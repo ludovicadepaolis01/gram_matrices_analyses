@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 from dataloader_dtd import class_loaders, class_subset_loaders
 from dataloader_gaussian import gaussian_loader, gaussian_subset_loaders
 #from torch.utils.data import dataset
-#import torch.nn as nn
+import torch.nn as nn
 #from torch.nn import parameter
 #from torch.nn import functional as F
 #import torchvision.transforms.functional as TF
@@ -84,30 +84,21 @@ orig_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/orig_
 info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots_{model_name}"
 gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/gram_{model_name}_data_s{optim_steps}.h5"
 
-for d in [reco_path, orig_path, info_plot_path, gram_matrices_path]:
+for d in [reco_path, orig_path, info_plot_path]:
     os.makedirs(d, exist_ok=True)
 
 if not os.path.exists(gram_matrices_path):
     with h5py.File(gram_matrices_path, "w") as _:
         pass
 
-checkpoint_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_project/gram_matrices_analyses/class_ckpts_{model_name}"
+checkpoint_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/class_ckpts_{model_name}"
 Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
-def save_class_ckpt(ckpt_path, batch_idx, step, reco_image, optimizer):
-    torch.save(
-        {
-            "batch_idx": int(batch_idx),
-            "step": int(step),
-            "reco_image": reco_image.detach().cpu(),
-            "optimizer": optimizer.state_dict(),
-        },
-        ckpt_path,
-    )
-
-def load_class_ckpt_if_any(ckpt_path):
+'''
+def load_class_checkpoint(ckpt_path):
     if os.path.exists(ckpt_path):
-        ckpt = torch.load(ckpt_path, map_location="cpu")
+        checkpoint = torch.load(ckpt_path, map_location="cpu")
+        optimizer_state
         return {
             "batch_idx": int(ckpt.get("batch_idx", 0)),
             "step": int(ckpt.get("step", 0)),
@@ -115,6 +106,7 @@ def load_class_ckpt_if_any(ckpt_path):
             "optimizer_state": ckpt.get("optimizer", None),
         }
     return None
+'''
 
 #take the layer names for data storage thanks chatgpt
 _ = model(torch.randn(1,3,224,224, device=device))  #dummy forward
@@ -159,9 +151,22 @@ h5f = h5py.File(gram_matrices_path, "a")
 for texture_name, texture_loader in class_subset_loaders.items():
     #print(texture_class)
     #img_index 0-14 because 120(img per class)/8(batch_size)
-    ckpt_path = os.path.join(checkpoint_path, f"{texture_name}.pt")
-    class_ckpt = load_class_ckpt_if_any(ckpt_path)
-    start_batch = class_ckpt["batch_idx"] if class_ckpt else 0
+    #per class checkpoint path
+    class_checkpoint_path = os.path.join(checkpoint_path, f"{texture_name}.pt")
+
+    checkpoint = None
+    start_batch = 0
+    #load checkpoint if present
+    if os.path.exists(class_checkpoint_path):
+        checkpoint = torch.load(class_checkpoint_path)
+        if checkpoint is not None and "batch_idx" in checkpoint:
+            start_batch = int(checkpoint["batch_idx"])
+    else: 
+        print(f"Checkpoint not found: {checkpoint_path}")        
+
+    last_batch = None
+    last_loss = None
+    final_reco_image = None
 
     for batch, (orig_image, reco_image) in enumerate(zip(texture_loader, gaussian_subset_loaders)):
     #for img_idx, orig_image in enumerate(texture_loader):
@@ -178,23 +183,25 @@ for texture_name, texture_loader in class_subset_loaders.items():
         optimizer = optim.Adam([reco_image], lr=1e-4)
 
         start_step = 0
-        if class_ckpt and batch == start_batch:
-            if class_ckpt["reco_image"] is not None:
+        if checkpoint is not None and batch == start_batch:
+            if checkpoint["reco_image"] is not None:
                 with torch.no_grad():
-                    reco_image.copy_(class_ckpt["reco_image"].to(device))
-            if class_ckpt["optimizer_state"] is not None:
-                optimizer.load_state_dict(class_ckpt["optimizer_state"])
-            start_step = class_ckpt["step"]
+                    reco_image.copy_(checkpoint["reco_image"].to(device))
+            if checkpoint["optimizer_state_dict"] is not None:
+                optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            start_step = checkpoint["step"]
             if start_step > 0:
-                print(f"[resume] class={texture_name} batch={batch} step={start_step}")
+                print(f"Resumed checkpoint: class={texture_name} batch={batch} step={start_step}")
 
         with torch.no_grad():
             orig_gram_matrices, feature_map_m_list, orig_feature_map_list = model(orig_image)
 
-        #optimization
-        for step in range(optim_steps): #this will print a progression line for each batch = 15 progression lines (120/8)
-            optimizer.zero_grad()
+        last_step = -1
 
+        #optimization
+        for step in range(start_step, optim_steps): #this will print a progression line for each batch = 15 progression lines (120/8)
+            last_step = step
+            optimizer.zero_grad()
             reco_gram_matrices, _, reco_feature_map_list = model(reco_image)
 
             sum_gram_matrix_loss = 0
@@ -221,7 +228,14 @@ for texture_name, texture_loader in class_subset_loaders.items():
                 df_gram.to_csv(csv_path, mode="w", header=True, index=False)      
 
             if step % 1000 == 0:
-                save_class_ckpt(ckpt_path, batch_idx=batch, step=step + 1, reco_image=reco_image, optimizer=optimizer)
+                torch.save({
+                    "batch_idx": batch,
+                    "step": step+1,
+                    "reco_image": reco_image.detach().cpu(),
+                    "optimizer_state_dict": optimizer.state_dict()}, class_checkpoint_path)
+                print(f"Checkpoint: {texture_name} batch={batch} step={step+1} loss={sum_gram_matrix_loss.item():.6g}", flush=True)
+
+        step_for_name = last_step if last_step >= 0 else start_step
 
         with torch.no_grad():
             #denormalize both images ????
@@ -250,10 +264,19 @@ for texture_name, texture_loader in class_subset_loaders.items():
                     del group_reco["gram"]  # overwrite if already present
                 group_reco.create_dataset("gram", data=g_reco, compression="gzip", compression_opts=4)
                 #print(group_reco)
+        #print(f"optimization_steps: {optim_steps}, texture: {texture_name}, gram loss: {sum_gram_matrix_loss}")
 
-    save_class_ckpt(ckpt_path, batch_idx=batch + 1, step=0, reco_image=reco_image, optimizer=optimizer)
+        torch.save({
+                "batch_idx": batch+1,
+                "step": 0,
+                "reco_image": reco_image.detach().cpu(),
+                "optimizer_state_dict": optimizer.state_dict()}, class_checkpoint_path)
+        
+        last_batch = batch
+        last_loss = sum_gram_matrix_loss.item() if last_step >= 0 else last_loss
+        final_reco_image = reco_image
 
-    print(f"optimization_steps: {optim_steps}, texture: {texture_name}, gram loss: {sum_gram_matrix_loss}")#, reconstruction loss: {reconstruction_loss}")
+    print(f"optimization_steps: {optim_steps}, texture: {texture_name}, gram loss: {last_loss}")#, reconstruction loss: {reconstruction_loss}")
 
     h5f.flush() 
     torch.cuda.empty_cache()
