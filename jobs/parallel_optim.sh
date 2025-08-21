@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --time=23:55:00
 #SBATCH --ntasks=1 #controls MPI tasks 
-#SBATCH --gres-per-task=1 #1 gpu
+#SBATCH --gpus-per-task=1 #1 gpu
 #SBATCH --cpus-per-task=8 #8 cpu cores per gpu
 #SBATCH --mem=32GB #memory requested, per cpu. 512 is max, always start small
 #SBATCH --account=Sis25_piasini #account name
@@ -25,4 +25,4 @@ MODELS=(vgg16 alexnet resnet18 resnet34 resnet50 resnet101 resnet151 googlenet i
 MODEL_NAME="${MODELS[$SLURM_ARRAY_TASK_ID]}"
 echo "Running model: $MODEL_NAME"
 
-python --unbuffered image_generation.py
+python --unbuffered image_generation.py 

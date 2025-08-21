@@ -3,8 +3,9 @@
 #SBATCH --nodes=1
 #SBATCH --time=00:15:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=480GB             # memory requested, per cpu
+#SBATCH --gpus-per-task=1 #1 gpu
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32GB             # memory requested, per cpu
 #SBATCH --account=Sis25_piasini       # account name
 #SBATCH --partition=boost_usr_prod # partition name
 #SBATCH --job-name=checkpoints
