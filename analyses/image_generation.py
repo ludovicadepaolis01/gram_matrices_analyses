@@ -252,7 +252,7 @@ for texture_name, texture_loader in class_subset_loaders.items():
             name = layer_names[gram_idx]
             for b in range(B):
                 #g_orig = orig_gram[b].detach().cpu().numpy()
-                g_reco = reco_gram[b].detach().cpu().numpy()
+                g_reco = reco_gram[b].detach().cpu().numpy().astype("float16")
                 base_path = f"{texture_name}/batch_{batch}/img_{b}/layer_{name}"
                 #group_orig = h5f.require_group("orig/" + base_path)
                 #print(group_orig)
@@ -262,7 +262,10 @@ for texture_name, texture_loader in class_subset_loaders.items():
                 #print(group_orig)
                 if "gram" in group_reco:
                     del group_reco["gram"]  # overwrite if already present
-                group_reco.create_dataset("gram", data=g_reco, compression="gzip", compression_opts=4)
+                group_reco.create_dataset(
+                    "gram", data=g_reco, 
+                    compression="gzip", 
+                    compression_opts=6)
                 #print(group_reco)
         #print(f"optimization_steps: {optim_steps}, texture: {texture_name}, gram loss: {sum_gram_matrix_loss}")
 

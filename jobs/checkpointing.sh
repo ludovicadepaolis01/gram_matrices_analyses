@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --gres=gpu:0
 #SBATCH --nodes=1
-#SBATCH --time=00:01:00
+#SBATCH --time=00:15:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=480GB             # memory requested, per cpu
@@ -39,8 +39,6 @@ wait_for_job() {
     echo "$jid" >> "$job_id_file"
 }
 
-MODEL_NAME=resnet18
-
 jid_pre=$(sbatch --parsable \
     --export=MODEL_NAME="$MODEL_NAME" \
     --job-name="${MODEL_NAME}_optimization" \
@@ -50,7 +48,7 @@ jid_pre=$(sbatch --parsable \
 wait_for_job "$jid_pre"
 
 prev_jid=$jid_pre
-for i in {1..20}; do
+for i in {1..3}; do
     jid=$(sbatch --parsable \
         --dependency=afterok:$prev_jid \
         --export=MODEL_NAME="$MODEL_NAME" \
