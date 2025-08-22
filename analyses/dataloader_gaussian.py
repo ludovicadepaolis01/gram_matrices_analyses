@@ -14,7 +14,7 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 from tqdm.auto import trange, tqdm
 
-batch_size = 5
+batch_size = 8
 num_images = 5640
 image_size = (3, 224, 224)
 mean = 0.5

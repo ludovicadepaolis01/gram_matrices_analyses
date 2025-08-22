@@ -14,7 +14,7 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 from tqdm.auto import trange, tqdm
 
-batch_size = 5
+batch_size = 8
 
 img_path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/clip_textures/data/dtd/images"
 img_dir = os.listdir(img_path)

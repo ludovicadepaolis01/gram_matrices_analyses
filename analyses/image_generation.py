@@ -123,7 +123,7 @@ mean = (0.5137, 0.4639, 0.4261)
 std = (0.2576, 0.2330, 0.2412)
 
 #parameters for dataloader
-batch_size = 5
+batch_size = 8
 
 def denormalize(input, mean, std):
     mean = torch.tensor(mean).view(1, -1, 1, 1).to(device)
@@ -233,7 +233,7 @@ for texture_name, texture_loader in class_subset_loaders.items():
                     "step": step+1,
                     "reco_image": reco_image.detach().cpu(),
                     "optimizer_state_dict": optimizer.state_dict()}, class_checkpoint_path)
-                print(f"Checkpoint: {texture_name} batch={batch} step={step+1} loss={sum_gram_matrix_loss.item():.6g}", flush=True)
+                print(f"Checkpoint: {texture_name} batch={batch} step={step+1} loss={sum_gram_matrix_loss.item()}", flush=True)
 
         step_for_name = last_step if last_step >= 0 else start_step
 
@@ -251,8 +251,7 @@ for texture_name, texture_loader in class_subset_loaders.items():
             B, C, _ = orig_gram.shape
             name = layer_names[gram_idx]
             for b in range(B):
-                #g_orig = orig_gram[b].detach().cpu().numpy()
-                g_reco = reco_gram[b].detach().cpu().numpy().astype("float16")
+                g_reco = reco_gram[b].detach().cpu().numpy()
                 base_path = f"{texture_name}/batch_{batch}/img_{b}/layer_{name}"
                 #group_orig = h5f.require_group("orig/" + base_path)
                 #print(group_orig)
