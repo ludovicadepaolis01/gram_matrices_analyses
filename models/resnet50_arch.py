@@ -16,7 +16,7 @@ OMP_NUM_THREADS=1
 
 #alexnet
 class resnet50_representations(nn.Module):
-     model_path = "/leonardo/home/userexternal/ldepaoli/resnet50-19c8e357.pth"
+     model_path = "/leonardo/home/userexternal/ldepaoli/models/resnet50-19c8e357.pth"
      def __init__(self): #images
           super().__init__() #refers to the class that this class inherits from (nn.Modules)
           self.resnet50_pretrained = models.resnet50()

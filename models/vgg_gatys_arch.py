@@ -16,7 +16,7 @@ OMP_NUM_THREADS=1
 
 #VGG16
 class VGG16_representations(nn.Module):
-     model_path = "/leonardo/home/userexternal/ldepaoli/vgg16_bn-6c64b313.pth"
+     model_path = "/leonardo/home/userexternal/ldepaoli/models/vgg16_bn-6c64b313.pth"
      def __init__(self): #images
           super().__init__() #refers to the class that this class inherits from (nn.Modules)
           self.vgg16_pretrained = models.vgg16_bn()

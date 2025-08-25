@@ -16,7 +16,7 @@ OMP_NUM_THREADS=1
 
 #alexnet
 class alexnet_representations(nn.Module):
-     model_path = "/leonardo/home/userexternal/ldepaoli/alexnet-owt-7be5be79.pth"
+     model_path = "/leonardo/home/userexternal/ldepaoli/models/alexnet-owt-7be5be79.pth"
      def __init__(self): #images
           super().__init__() #refers to the class that this class inherits from (nn.Modules)
           self.alexnet_pretrained = models.alexnet()

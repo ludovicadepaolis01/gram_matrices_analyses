@@ -23,7 +23,7 @@ OMP_NUM_THREADS=1
 
 #inceptionnet
 class densenet121_representations(nn.Module):
-     model_path = "/leonardo/home/userexternal/ldepaoli/densenet121-a639ec97.pth"
+     model_path = "/leonardo/home/userexternal/ldepaoli/models/densenet121-a639ec97.pth"
      def __init__(self): #images
           super().__init__() #refers to the class that this class inherits from (nn.Modules)
           self.densenet121_pretrained = models.densenet121()

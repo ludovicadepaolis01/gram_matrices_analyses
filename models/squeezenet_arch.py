@@ -16,7 +16,7 @@ OMP_NUM_THREADS=1
 
 #inceptionnet
 class squeezenet_representations(nn.Module):
-     model_path = "/leonardo/home/userexternal/ldepaoli/squeezenet1_1-b8a52dc0.pth"
+     model_path = "/leonardo/home/userexternal/ldepaoli/models/squeezenet1_1-b8a52dc0.pth"
      def __init__(self): #images
           super().__init__() #refers to the class that this class inherits from (nn.Modules)
           self.squeezenet_pretrained = models.squeezenet1_1()

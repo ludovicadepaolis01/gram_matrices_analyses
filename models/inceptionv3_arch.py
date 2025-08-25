@@ -16,7 +16,7 @@ OMP_NUM_THREADS=1
 
 #inceptionnet
 class inceptionv3_representations(nn.Module):
-     model_path = "/leonardo/home/userexternal/ldepaoli/inception_v3_google-1a9a5a14.pth"
+     model_path = "/leonardo/home/userexternal/ldepaoli/models/inception_v3_google-1a9a5a14.pth"
      def __init__(self): #images
           super().__init__() #refers to the class that this class inherits from (nn.Modules)
           self.inceptionv3_pretrained = models.inception_v3(aux_logits=True)
