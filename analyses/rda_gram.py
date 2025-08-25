@@ -16,10 +16,10 @@ import pandas as pd
 
 optim_step = 30000
 
-path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_project/vgg_analyses"
-rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_project/vgg_analyses/rdms_s{optim_step}/"
-file  = os.path.join(path, f"gram_data_s{optim_step}.h5")
-plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_project/vgg_analyses/plots"
+path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/"
+rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms/rdms_s{optim_step}/"
+file  = os.path.join(path, f"orig_gram_vgg16_data.h5")
+plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 
 for png_file in glob.glob(os.path.join(plot_path, "*.png")):
     os.remove(png_file)
@@ -34,23 +34,23 @@ reco_labels_by_layer = defaultdict(list)
 #open file explore and sort the data: 
 #need to get one similarity matrix of 5640*5640 (gram computed on images) per mode per layer
 with h5py.File(file, "r") as f:
+    print(list(f.keys()))
     #print(f)
     #orig_layer_list = []
     #reco_layer_list = []
-    #orig = f["orig"]
+    orig = f["orig"]
     #print(orig) #47 members
-    reco = f["reco"]
+    #reco = f["reco"]
     #print(reco) #47 members
     
     #orig mode
-    for texture in reco:
+    for texture in orig:
         #print(texture)
-        reco_texture_group = reco[texture]
+        orig_texture_group = orig[texture]
         #orig_texture_group = orig[texture]
         #print(texture_group) #1 member
         # loop epochs (e.g. "epoch_0", "epoch_1", …)
 
-        '''
         for orig_batch in orig_texture_group:
             #print(orig_batch) #batch_14 correct because 120/8
             orig_batch_group = orig_texture_group[orig_batch]
@@ -66,8 +66,8 @@ with h5py.File(file, "r") as f:
                     orig_vec = orig_gram.ravel()
                     orig_vecs_by_layer[orig_layer].append(orig_vec)
                     orig_labels_by_layer[orig_layer].append(f"{texture}|{orig_batch}|{orig_img}")
-        '''
-                    
+        
+        '''          
         #reco mode
         for reco_batch in reco_texture_group:
             #print(reco_batch) #batch_14 correct because 120/8
@@ -81,7 +81,7 @@ with h5py.File(file, "r") as f:
                     reco_vecs_by_layer[reco_layer].append(reco_vec)
                     reco_labels_by_layer[reco_layer].append(f"{texture}")#|{reco_batch}|{reco_img}")
                     #reco_labels_by_layer[reco_layer].append(f"{texture}|{reco_batch}|{reco_img}")
-
+        '''
 
 #sanity check: if batched is 376 images/grams, if not 5640
 
@@ -102,6 +102,7 @@ def optimal_clusters_by_entropy(data, true_labels, entropy_function, layer_name,
         try:
             model = AgglomerativeClustering(n_clusters=k, linkage='ward')
             found_labels = model.fit_predict(data)
+            print(len(found_labels))
             entropy_value = entropy_function(found_labels)
             entropy_dict[k] = entropy_value
             label_dict[k] = found_labels
