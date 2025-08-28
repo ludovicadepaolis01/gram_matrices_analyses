@@ -67,22 +67,31 @@ model_dict = {
     "densenet201": densenet201_representations,
 }
 
+
+
 #parse command-line argument
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, required=True, choices=model_dict.keys(), help="Which model to run")
+parser.add_argument("--model", type=str, required=True, choices=model_dict.keys(), 
+                    help="Which model to run")
+#parser.add_argument("--mode", type=str, required=True, choices=["orig", "reco"], 
+#                    help="Gram matrix mode: orig or reco")
+#parser.add_argument("--optim_steps", type=int, required=True, choices=None, 
+#                    help="N. optimization steps to reconstruct textures")
 args = parser.parse_args()
-
 model_name = args.model
 model = model_dict[args.model]()
-#print(model)
+#optim_steps = args.optim_steps
+#mode = args.mode
+
 MSE = torch.nn.MSELoss()
 device = "cuda"
-optim_steps = 30000
+optim_steps = 1
+mode = "orig"
 
 reco_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/reco_images_{model_name}"
 orig_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/orig_images_{model_name}"
 info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots_{model_name}"
-gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/gram_{model_name}_data_s{optim_steps}.h5"
+gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/{mode}_gram_{model_name}_data.h5"
 
 for d in [reco_path, orig_path, info_plot_path]:
     os.makedirs(d, exist_ok=True)
@@ -148,7 +157,7 @@ data_gram_list = []
 #h5f = h5py.File(gram_matrices_path, "a", libver=("latest", "latest"))
 h5f = h5py.File(gram_matrices_path, "a")
 
-for texture_name, texture_loader in class_subset_loaders.items():
+for texture_name, texture_loader in class_loaders.items():
     #print(texture_class)
     #img_index 0-14 because 120(img per class)/8(batch_size)
     #per class checkpoint path
@@ -168,7 +177,7 @@ for texture_name, texture_loader in class_subset_loaders.items():
     last_loss = None
     final_reco_image = None
 
-    for batch, (orig_image, reco_image) in enumerate(zip(texture_loader, gaussian_subset_loaders)):
+    for batch, (orig_image, reco_image) in enumerate(zip(texture_loader, gaussian_loader)):
     #for img_idx, orig_image in enumerate(texture_loader):
         #print(f"img_idx {img_idx}")
         if batch < start_batch:
@@ -251,23 +260,45 @@ for texture_name, texture_loader in class_subset_loaders.items():
             B, C, _ = orig_gram.shape
             name = layer_names[gram_idx]
             for b in range(B):
-                g_reco = reco_gram[b].detach().cpu().numpy()
-                base_path = f"{texture_name}/batch_{batch}/img_{b}/layer_{name}"
-                #group_orig = h5f.require_group("orig/" + base_path)
-                #print(group_orig)
-                group_reco = h5f.require_group("reco/" + base_path)
-                #print(group_reco)
-                #group_orig.create_dataset("gram", data=g_orig, compression="gzip", compression_opts=4)
-                #print(group_orig)
-                if "gram" in group_reco:
-                    del group_reco["gram"]  # overwrite if already present
-                group_reco.create_dataset(
-                    "gram", data=g_reco, 
-                    compression="gzip", 
-                    compression_opts=6)
-                #print(group_reco)
-        #print(f"optimization_steps: {optim_steps}, texture: {texture_name}, gram loss: {sum_gram_matrix_loss}")
+                if mode == "reco":
+                    g = reco_gram[b].detach().cpu().numpy()
+                else:  #mode == "orig"
+                    g = orig_gram[b].detach().cpu().numpy()
 
+                base_path = f"{texture_name}/batch_{batch}/img_{b}/layer_{name}"
+                group = h5f.require_group(base_path)
+
+                if "gram" in group: #overwrite if h5py exists
+                    del group["gram"]
+                group.create_dataset("gram", data=g, compression="gzip", compression_opts=6)
+
+                '''
+                if mode == "reco":
+                    g_reco = reco_gram[b].detach().cpu().numpy()
+                    base_path = f"{texture_name}/batch_{batch}/img_{b}/layer_{name}"
+                    group_reco = h5f.require_group("reco/" + base_path)
+                    if "gram" in group_reco:
+                        del group_reco["gram"]  # overwrite if already present
+                    group_reco.create_dataset(
+                        "gram", data=g_reco, 
+                        compression="gzip", 
+                        compression_opts=6)
+                
+                elif mode == "orig":
+                    g_orig = orig_gram[b].detach().cpu().numpy()
+                    base_path = f"{texture_name}/batch_{batch}/img_{b}/layer_{name}"
+                    group_orig = h5f.require_group("orig/" + base_path)
+                    if "gram" in group_orig:
+                        del group_orig["gram"]  # overwrite if already present
+                    group_orig.create_dataset(
+                        "gram", data=g_orig, 
+                        compression="gzip", 
+                        compression_opts=6)
+                    
+                else:
+                    print("specify mode: reco or orig")
+                '''
+                
         torch.save({
                 "batch_idx": batch+1,
                 "step": 0,
