@@ -114,7 +114,9 @@ labels_by_layer = defaultdict(list)
 with h5py.File(file, "r") as f:
     #print(list(f.keys()))
     for texture_name in f.keys():
+        #print(texture_name)
         texture = f[texture_name]
+        #print(texture)
         for batch_name in texture.keys():
             batch = texture[batch_name]
             for image_name in batch.keys():
@@ -124,7 +126,9 @@ with h5py.File(file, "r") as f:
                     vec = gram.ravel()
                     #print(len(vec))
                     vecs_by_layer[layer_name].append(vec)
-                    labels_by_layer[layer_name].append(f"{texture}|{batch}|{image}")
+                    labels_by_layer[layer_name].append(texture_name)
+
+#print(labels_by_layer)
 
 #compute similarity matrix, plot and hierarchical clustering
 results = []  
@@ -132,6 +136,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
     for layer, vectors in layer_vectors.items():
         #vectors = vectors[:200]
         labels = layer_labels[layer]#[:200]
+        #print(labels)
         X = np.stack(vectors, axis=0).astype(np.float32)
         #normalize rows for cosine
         norms = np.linalg.norm(X, axis=1, keepdims=True)
