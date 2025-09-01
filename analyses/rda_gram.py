@@ -24,15 +24,25 @@ plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plo
 for png_file in glob.glob(os.path.join(plot_path, "*.png")):
     os.remove(png_file)
 
-def hieararchical_clustering_by_mi(gram_vectors_data, entropy_function, pca_function, layer_name, mode, real_classes=47, plot=True, plot_path="."):
+def hieararchical_clustering_by_mi(
+        gram_vectors_data, 
+        true_labels, 
+        mi_function, 
+        pca_function, 
+        layer_name, 
+        mode, 
+        real_classes=47, 
+        plot=True, 
+        plot_path="."
+    ):
     mi_dict = {}
     label_dict = {}
     
-    for k in real_classes:
+    for k in range(1, real_classes+1):
         model = AgglomerativeClustering(n_clusters=k, linkage='ward')
         found_clusters = model.fit_predict(gram_vectors_data)
-        print(len(found_clusters))
-        mutual_info = entropy_function(gram_vectors_data, found_clusters)    
+        data_for_mi = np.column_stack([true_labels, found_clusters])
+        mutual_info = mi_function(data_for_mi)    
         mi_dict[k] = mutual_info
         label_dict[k] = found_clusters
 
@@ -44,16 +54,11 @@ def hieararchical_clustering_by_mi(gram_vectors_data, entropy_function, pca_func
     max_mi = max(mi_values)
     print(mi_values)
     print(max_mi)
-    best_k = label_dict[max_mi]
+    best_k = max(mi_dict, key=mi_dict.get)
     print(best_k)
-
-    '''
-    #elbow? or knee? any other anatomical curve
-    knee = KneeLocator(ks, entropies, curve='convex', direction='decreasing')
-    best_k = knee.knee if knee.knee is not None else min(entropy_dict, key=entropy_dict.get)
     best_labels = label_dict[best_k]
-    '''
-    #plot minimum entropy by cluster
+
+    #plot mi by cluster
     if plot:
         fname = f"{mode}_{layer_name}_k{best_k}_mi.png"
         os.makedirs(plot_path, exist_ok=True)
@@ -61,7 +66,7 @@ def hieararchical_clustering_by_mi(gram_vectors_data, entropy_function, pca_func
         plt.plot(ks, mi_values, marker='o', linestyle='-')
         plt.axvline(best_k, color='red', linestyle='--', label=f'Best k = {best_k}')
         plt.xlabel("n. of found clusters")
-        plt.ylabel("entropy")
+        plt.ylabel("mutual information")
         plt.title(f"layer {layer_name} entropy per found clusters")
         plt.legend()
         plt.grid(True)
@@ -71,12 +76,12 @@ def hieararchical_clustering_by_mi(gram_vectors_data, entropy_function, pca_func
 
     #fit model with best k and plot
     final_model = AgglomerativeClustering(n_clusters=best_k, linkage='ward')
-    found_clusters = final_model.fit_predict(gram_vectors_data)
+    found_clusters_ = final_model.fit_predict(gram_vectors_data)
     pca = pca_function(n_components=3)
     gram_vectors_proj = pca.fit_transform(gram_vectors_data)
 
     if plot: 
-        fname = f"{mode}_{layer}_clusters.png"
+        fname = f"{mode}_{layer_name}_clusters.png"
         os.makedirs(plot_path, exist_ok=True)
         fig = plt.figure(figsize=(9, 9))
         ax = fig.add_subplot(111, projection="3d")
@@ -97,12 +102,8 @@ def hieararchical_clustering_by_mi(gram_vectors_data, entropy_function, pca_func
         plt.savefig(os.path.join(plot_path, fname))
         plt.close(fig)
 
-    return best_k, best_labels, mi_dict, found_clusters
-
-#for layer, vecs in orig_vecs_by_layer.items():
-#    print(f"orig layer {layer}: {len(vecs)} vectors")
-#for layer, vecs in reco_vecs_by_layer.items():
-#    print(f"reco layer {layer}: {len(vecs)} vectors")
+    codes = true_labels
+    return codes, best_k, best_labels, mi_dict, found_clusters_
 
 #set up empty auto-expanding dictionaries for collecting your data grouped by layer
 vecs_by_layer = defaultdict(list)
@@ -112,7 +113,6 @@ labels_by_layer = defaultdict(list)
 #need to get one similarity matrix of 5640*5640 (gram computed on images) per mode per layer
 with h5py.File(file, "r") as f:
     #print(list(f.keys()))
-
     for texture_name in f.keys():
         texture = f[texture_name]
         for batch_name in texture.keys():
@@ -126,35 +126,23 @@ with h5py.File(file, "r") as f:
                     vecs_by_layer[layer_name].append(vec)
                     labels_by_layer[layer_name].append(f"{texture}|{batch}|{image}")
 
-#sanity check: if batched is 376 images/grams, if not 5640
-#print(len(vecs_by_layer)) #5 layers of vgg
-#print(vecs_by_layer)
-print(labels_by_layer.keys())
-#check keys
-#print(len(labels_by_layer)) #5
-#print(len(img_list)) #376 for 0th epoch 14 batched images * 47 categories
-#print(len(reco_img_list)) #376
-
-results = []  
 #compute similarity matrix, plot and hierarchical clustering
+results = []  
 for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
     for layer, vectors in layer_vectors.items():
         #vectors = vectors[:200]
         labels = layer_labels[layer]#[:200]
-        print(len(labels))
         X = np.stack(vectors, axis=0).astype(np.float32)
         #normalize rows for cosine
         norms = np.linalg.norm(X, axis=1, keepdims=True)
         Xn = X/(norms + 1e-12)
-        #print(Xn.shape)
         similarity_matrix  = Xn.dot(Xn.T)
-        #print(similarity_matrix.shape)
 
         #save similarity matrix
         matrix_path = os.path.join(os.path.dirname(rdms_path), f"{mode}_{layer}_cosine.npy")
         np.save(matrix_path, similarity_matrix)
-        #print(f"Saved {mode}/{layer} similarity → {out}")
 
+        '''
         #plot similarity matrix heatmap
         plt.figure(figsize=(30,30)) #increase resolution con dpi argument
         im = plt.imshow(similarity_matrix, aspect="auto", vmin=0, vmax=1)
@@ -171,23 +159,28 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         plt.tight_layout()
         plt.close()
         #plt.savefig(os.path.join(plot_path, f"{mode}_rsa_{layer}_s{optim_step}.png"), dpi=200)
-        
-        #plt.show() 
+        ''' 
 
-        best_k, best_labels, mi_dict, found_clusters = hieararchical_clustering_by_mi(
+        codes, _ = pd.factorize(np.asanyarray(labels))
+
+        codes, best_k, best_labels, mi_dict, found_clusters_ = hieararchical_clustering_by_mi(
             Xn, 
-            entropy_function=ndd.entropy, 
+            codes,
+            mi_function=ndd.mutual_information, 
             pca_function=PCA, 
             layer_name=layer, 
             mode=mode,
-            plot_path=plot_path)
+            plot_path=plot_path
+        )
+        
+        print(codes)
         print(best_k)
         print(best_labels)
         print(mi_dict)
-        print(found_clusters)
+        print(found_clusters_)
 
-        clusters = np.asarray(found_clusters).reshape(-1)
-        codes, classes = pd.factorize(labels)
+        clusters = np.asarray(found_clusters_).reshape(-1)
+        #codes, classes = pd.factorize(labels)
 
         csv_clusters = os.path.join(plot_path, f"{layer}_found_clusters.csv")
         csv_classses = os.path.join(plot_path, f"{layer}_real_classes.csv")
