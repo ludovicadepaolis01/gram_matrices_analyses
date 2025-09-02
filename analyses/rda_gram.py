@@ -5,20 +5,22 @@ import numpy as np
 from collections import defaultdict
 from scipy.spatial.distance import squareform
 from scipy.cluster import hierarchy
+from scipy.signal import savgol_filter
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import glob
 import ndd
 from kneed import KneeLocator
-from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 
 mode = "orig"
 
-path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/"
-rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms/"
-file  = os.path.join(path, f"orig_gram_vgg16_data.h5")
+path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/data"
+rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms"
+#file  = os.path.join(path, f"{mode}_gram_vgg16_data.h5")
+file  = os.path.join(path, f"orig_gram_vgg16_data_10.h5")
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 
 for png_file in glob.glob(os.path.join(plot_path, "*.png")):
@@ -38,7 +40,7 @@ def hieararchical_clustering_by_mi(
     mi_dict = {}
     label_dict = {}
     
-    for k in range(1, real_classes+1):
+    for k in range(2, real_classes+1):
         model = AgglomerativeClustering(n_clusters=k, linkage='ward')
         found_clusters = model.fit_predict(gram_vectors_data)
         data_for_mi = np.column_stack([true_labels, found_clusters])
@@ -51,12 +53,22 @@ def hieararchical_clustering_by_mi(
 
     ks = list(mi_dict.keys())
     mi_values = list(mi_dict.values())
-    max_mi = max(mi_values)
-    print(mi_values)
-    print(max_mi)
-    best_k = max(mi_dict, key=mi_dict.get)
-    print(best_k)
+    print(f"mi values {mi_values}")
+    #max_mi = max(mi_values)
+    #print(f"max mi {max_mi}")
+    #best_k = max(mi_dict, key=mi_dict.get)
+    #print(f"best k{best_k}")
+    #best_labels = label_dict[best_k]
+
+    #smoothing because knee needs monotone curves
+    #mi_smooth = savgol_filter(mi_values, window_length=7, polyorder=2)  #tweak window_length
+    #mi_monotone = np.maximum.accumulate(mi_smooth)  #guards against small dips
+    #elbow? or knee? any other anatomical curve
+    knee = KneeLocator(ks, mi_values, curve='concave', direction='increasing', S=3.0) #S is sensitivity curve param. the higher the smoother
+    best_k = knee.knee if knee.knee is not None else max(mi_dict, key=mi_dict.get) #which is max_mi
     best_labels = label_dict[best_k]
+    print(f"best k{best_k}")
+    print(f"best label{best_labels}")
 
     #plot mi by cluster
     if plot:
@@ -164,7 +176,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         plt.tight_layout()
         plt.close()
         #plt.savefig(os.path.join(plot_path, f"{mode}_rsa_{layer}_s{optim_step}.png"), dpi=200)
-        ''' 
+        '''
 
         codes, _ = pd.factorize(np.asanyarray(labels))
 
@@ -178,11 +190,11 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
             plot_path=plot_path
         )
         
-        print(codes)
-        print(best_k)
-        print(best_labels)
-        print(mi_dict)
-        print(found_clusters_)
+        print(f"codes {codes}")
+        print(f"best k {best_k}")
+        print(f"best labels {best_labels}")
+        print(f"mi dict {mi_dict}")
+        print(f"found clusters {found_clusters_}")
 
         clusters = np.asarray(found_clusters_).reshape(-1)
         #codes, classes = pd.factorize(labels)

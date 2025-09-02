@@ -14,19 +14,20 @@ all_files = glob.glob(os.path.join(data_path, "*.csv"))
 files_classes  = sorted([file for file in all_files if "real_classes" in os.path.basename(file)])
 files_clusters = sorted([file for file in all_files if "found_clusters" in os.path.basename(file)])
 
-for class_, cluster in zip(files_classes, files_clusters):
-    df_classes  = pd.read_csv(class_)
-    df_clusters = pd.read_csv(cluster)
+with open("/leonardo/home/userexternal/ldepaoli/lab/gram_project/vgg_analyses/src/output.txt", "w") as f:
 
-    df_joint = pd.DataFrame({
-        "true_classes": df_classes["true_classes"],
-        "cluster_id": df_clusters["cluster_id"]
-    })
+    for class_, cluster in zip(files_classes, files_clusters):
+        df_classes  = pd.read_csv(class_)
+        df_clusters = pd.read_csv(cluster)
 
+        df_joint = pd.DataFrame({
+            "true_classes": df_classes["true_classes"],
+            "cluster_id": df_clusters["cluster_id"]
+        })
 
-    mi = ndd.mutual_information(df_joint.to_numpy(dtype=int))
-    print(f"{os.path.basename(class_)} vs {os.path.basename(cluster)} -> MI = {mi}")
+        mi = ndd.mutual_information(df_joint.to_numpy(dtype=int))
 
+        f.write(f"{os.path.basename(class_)} vs {os.path.basename(cluster)} -> MI = {mi}\n")
 '''
 def get_mutual_info(n_classes, n_clusters):
     counts = np.random.randint(n_classes, n_clusters)
