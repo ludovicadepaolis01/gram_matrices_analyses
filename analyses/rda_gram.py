@@ -57,8 +57,8 @@ csv_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs
 checkpoint_dir = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/analyses_checkpoints/analyses_ckpts_{model_name}"
 Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
 
-for png_file in glob.glob(os.path.join(plot_path, "*.png")):
-    os.remove(png_file)
+for d in [plot_path, csv_path]:
+    os.makedirs(d, exist_ok=True)
 
 def hieararchical_clustering_by_mi(
         gram_vectors_data, 
@@ -118,10 +118,10 @@ def hieararchical_clustering_by_mi(
     if not mi_dict:
         raise ValueError("no clustering found :(")
 
-    ks = sorted(mi_dict.keys())
-    mi_values = [mi_dict[k] for k in ks]
-    #ks = list(mi_dict.keys())
-    #mi_values = list(mi_dict.values())
+    #ks = sorted(mi_dict.keys())
+    #mi_values = [mi_dict[k] for k in ks]
+    ks = list(mi_dict.keys())
+    mi_values = list(mi_dict.values())
     #print(f"mi values {mi_values}")
     #max_mi = max(mi_values)
     #print(f"max mi {max_mi}")
@@ -136,13 +136,13 @@ def hieararchical_clustering_by_mi(
     knee = KneeLocator(ks, mi_monotone, curve='concave', direction='increasing', S=7.0) #S is sensitivity curve param. the higher the smoother
     best_k = knee.knee if knee.knee is not None else max(mi_dict, key=mi_dict.get) #which is max_mi
     best_labels = label_dict[best_k]
-    #print(f"best k{best_k}")
-    #print(f"best label{best_labels}")
+    print(f"best k{best_k}")
+    print(f"best label{best_labels}")
 
     #plot mi by cluster
     if plot:
         fname = f"{model_name}_{layer_name}_{mode}_k{best_k}_mi.png"
-        os.makedirs(plot_path, exist_ok=True)
+        #os.makedirs(plot_path, exist_ok=True)
         plt.figure(figsize=(10, 6))
         plt.plot(ks, mi_values, marker='o', linestyle='-')
         plt.axvline(best_k, color='red', linestyle='--', label=f'Best k = {best_k}')
@@ -163,7 +163,7 @@ def hieararchical_clustering_by_mi(
 
     if plot: 
         fname = f"{model_name}_{layer_name}_{mode}_clusters.png"
-        os.makedirs(plot_path, exist_ok=True)
+        #os.makedirs(plot_path, exist_ok=True)
         fig = plt.figure(figsize=(9, 9))
         ax = fig.add_subplot(111, projection="3d")
         sc = ax.scatter(
@@ -225,7 +225,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         similarity_matrix  = Xn.dot(Xn.T)
 
         #save similarity matrix
-        matrix_path = os.path.join(os.path.dirname(rdms_path), f"{mode}_{layer}_cosine.npy")
+        matrix_path = os.path.join(rdms_path, f"{model_name}_{layer}_{mode}_cosine.npy")
         np.save(matrix_path, similarity_matrix)
 
         #plot similarity matrix heatmap and save them to $WORK because heavy af
