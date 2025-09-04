@@ -87,11 +87,12 @@ MSE = torch.nn.MSELoss()
 device = "cuda"
 optim_steps = 1
 mode = "orig"
+subset = "all"
 
 reco_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/reco_images_{model_name}"
 orig_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/orig_images_{model_name}"
-info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots_{model_name}"
-gram_matrices_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/models_checkpoints/{mode}_gram_{model_name}_data.h5"
+info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots/info_plot_{model_name}"
+gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/data/{mode}_gram_{model_name}_data_{subset}.h5"
 
 for d in [reco_path, orig_path, info_plot_path]:
     os.makedirs(d, exist_ok=True)
@@ -100,7 +101,7 @@ if not os.path.exists(gram_matrices_path):
     with h5py.File(gram_matrices_path, "w") as _:
         pass
 
-checkpoint_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/class_ckpts_{model_name}"
+checkpoint_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/models_checkpoints/class_ckpts_{model_name}"
 Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
 '''
