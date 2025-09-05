@@ -51,7 +51,7 @@ model_name = args.model
 path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/data"
 rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms"
 #file  = os.path.join(path, f"{mode}_gram_vgg16_data.h5")
-file  = os.path.join(path, f"orig_gram_{model_name}_data_10.h5")
+file  = os.path.join(path, f"orig_gram_{model_name}_data.h5")
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 csv_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs"
 checkpoint_dir = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/analyses_checkpoints/analyses_ckpts_{model_name}"
@@ -152,7 +152,7 @@ def hieararchical_clustering_by_mi(
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig(os.path.join(plot_path, fname))
+        plt.savefig(os.path.join(rdms_path, fname))
         plt.close()
 
     #fit model with best k and plot
@@ -180,7 +180,7 @@ def hieararchical_clustering_by_mi(
         cbar = fig.colorbar(sc, ax=ax, fraction=0.046, pad=0.04)
         cbar.set_label("cluster ID")
         plt.tight_layout()
-        plt.savefig(os.path.join(plot_path, fname))
+        plt.savefig(os.path.join(rdms_path, fname))
         plt.close(fig)
 
     codes = true_labels
