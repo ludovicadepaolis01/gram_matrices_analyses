@@ -45,7 +45,7 @@ wait_for_job "$jid_pre"
 prev_jid=$jid_pre
 for i in {1..2}; do
     jid=$(sbatch --parsable $BASE_OPTS \
-        --dependency=afterok:$prev_jid \
+        --dependency=afterany:$prev_jid \
         --job-name="${MODEL_NAME}_optimization" \
         --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_gen_%A.out" \
         --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_err_%A.err" \

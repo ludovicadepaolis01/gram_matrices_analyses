@@ -27,7 +27,7 @@ echo "Running model: $MODEL_NAME"
 
 cd $HOME/lab/gram_matrices_analyses/analyses
 
-BASE_OPTS="--partition=boost_usr_prod --account=Sis25_piasini -n 1 -c 8 --mem=32G -t 23:55:00 --gres=gpu:1"
+BASE_OPTS="--partition=boost_usr_prod --account=Sis25_piasini -n 1 -c 8 --mem=128G -t 23:55:00 --gres=gpu:1" #use --mem=64G because --mem=32G kills it due to OOM 
 
 wait_for_job() {
     local jid=$1
@@ -45,7 +45,7 @@ wait_for_job "$jid_pre"
 prev_jid=$jid_pre
 for i in {1..2}; do
     jid=$(sbatch --parsable $BASE_OPTS \
-        --dependency=afterok:$prev_jid \
+        --dependency=afterany:$prev_jid \
         --job-name="${MODEL_NAME}_analyses" \
         --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/analyses_out/${MODEL_NAME}_gen_%A.out" \
         --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/analyses_out/${MODEL_NAME}_err_%A.err" \
