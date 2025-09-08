@@ -83,10 +83,10 @@ def hieararchical_clustering_by_mi(
 
     if os.path.exists(ckpt_path):
         data = np.load(ckpt_path, allow_pickle=True)
-        done_ks = set(data["ks_done"].tolist())
         mi_dict.update(data["mi_dict"].item())
         labels_by_k = data["labels_by_k"].item()
         label_dict.update({int(k): labels_by_k[str(k)] for k in labels_by_k})
+        done_ks = set(map(int, mi_dict.keys()))
         print(f"resume {layer_name}: found done ks: {sorted(done_ks)}")
     else:
         done_ks = set()
@@ -105,7 +105,7 @@ def hieararchical_clustering_by_mi(
         mi_dict[k] = float(mutual_info)
         label_dict[k] = found_clusters.astype(np.int16)
 
-        ks_done = sorted(list(set(done_ks) | {k}))
+        ks_done = sorted(set(done_ks) | set(mi_dict.keys())) 
         labels_by_k = {str(kk): label_dict[kk] for kk in label_dict}
         np.savez_compressed(
             ckpt_path,
@@ -120,8 +120,8 @@ def hieararchical_clustering_by_mi(
 
     #ks = sorted(mi_dict.keys())
     #mi_values = [mi_dict[k] for k in ks]
-    ks = list(mi_dict.keys())
-    mi_values = list(mi_dict.values())
+    ks = sorted(mi_dict.keys())
+    mi_values = [mi_dict[k] for k in ks]
     #print(f"mi values {mi_values}")
     #max_mi = max(mi_values)
     #print(f"max mi {max_mi}")
