@@ -6,28 +6,13 @@ import ndd
 import glob
 import pandas as pd
 import regex as re
-
-model_list = [
-    "vgg16",
-    "alexnet",
-    "resnet18",
-    "resnet34",
-    "resnet50",
-    "resnet101",
-    "resnet151",
-    "googlenet",
-    "inceptionv3",
-    "squeezenet",
-    "mobilenet",
-    "densenet121",
-    "densenet161",
-    "densenet169",
-    "densenet201"
-]
+import matplotlib.pyplot as plt
 
 data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_data_subset_05092025"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
 output_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
+plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
+subset = "10"
 
 all_files = glob.glob(os.path.join(data_path, "*.csv"))
 
@@ -64,3 +49,31 @@ for class_, cluster in zip(files_classes, files_clusters):
 df = pd.DataFrame(data, columns=["model", "layer", "mi"]).reset_index(drop=True)
 mi_csv = df.to_csv(os.path.join(output_path, "mi_csv.csv"))
 #print(df)
+
+df_copy = df.copy()
+df_copy["layer_idx"] = df_copy["layer"].str.extract(r"(\d+)$").astype(int)
+df_copy = df_copy.sort_values(["model", "layer_idx"])
+
+# 2) For each model, assign x = 1..5 (position in that model after sorting)
+df_copy["pos"] = df_copy.groupby("model").cumcount() + 1
+
+# 3) Plot: one line per model, x = 1..5, y = MI
+fig, ax = plt.subplots(figsize=(15, 10))
+for model, group in df_copy.groupby("model"):
+    ax.plot(group["pos"], group["mi"], marker="o", label=model)
+    # optional: annotate each point with the true layer index
+    for x, y, idx in zip(group["pos"], group["mi"], group["layer_idx"]):
+        ax.annotate(str(idx), (x, y), textcoords="offset points", xytext=(0, 6),
+                    ha="center", fontsize=8)
+
+ax.set_xlabel("Layers")
+ax.set_ylabel("MI")
+ax.set_title("MI per model across layers")
+ax.set_xticks([1, 2, 3, 4, 5])
+ax.set_xlim(0.5, 5.5)
+ax.grid(True, alpha=0.3)
+ax.legend(title="Model", loc="best")
+
+plt.tight_layout()
+plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}.png"), bbox_inches="tight")
+plt.close(fig)
