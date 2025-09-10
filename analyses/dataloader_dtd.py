@@ -14,6 +14,7 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 from tqdm.auto import trange, tqdm
 
+subset_size = 5
 batch_size = 8
 
 img_path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/clip_textures/data/dtd/images"
@@ -82,7 +83,7 @@ class ImgDataset(Dataset):
             raise ValueError("Expected a PIL.Image object.")
   
 #define subsets in case needed for toy model
-subset_size = 1
+subset_size = subset_size
 
 class_loaders = {}
 class_subset_loaders = {}
@@ -94,7 +95,7 @@ for class_name, img_list in img_dict.items():
 
     subset_indices = list(range(len(dataset)))[:subset_size]
     subset = Subset(dataset, subset_indices)
-    subset_loader = DataLoader(subset, batch_size=batch_size, shuffle=False)   
+    subset_loader = DataLoader(subset, batch_size=batch_size, shuffle=True)   
     class_subset_loaders[class_name] = subset_loader 
 
 '''

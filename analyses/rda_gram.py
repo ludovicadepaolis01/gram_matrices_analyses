@@ -19,8 +19,10 @@ from pathlib import Path
 
 mode = "orig"
 
+'''
 model_list = [
     "vgg16",
+    "vgg19",
     "alexnet",
     "resnet18",
     "resnet34",
@@ -36,6 +38,9 @@ model_list = [
     "densenet169",
     "densenet201"
 ]
+'''
+
+model_list = ["vgg19"]
 
 #parse command-line argument
 parser = argparse.ArgumentParser()

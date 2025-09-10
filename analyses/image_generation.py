@@ -69,8 +69,6 @@ model_dict = {
     "densenet201": densenet201_representations,
 }
 
-
-
 #parse command-line argument
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, required=True, choices=model_dict.keys(), 
@@ -87,14 +85,14 @@ model = model_dict[args.model]()
 
 MSE = torch.nn.MSELoss()
 device = "cuda"
-optim_steps = 1
-mode = "orig"
-subset = "all"
+optim_steps = 30000
+mode = "reco"
+subset = ""
 
 reco_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/reco_images_{model_name}"
 orig_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/orig_images_{model_name}"
-info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots/info_plot_{model_name}"
-gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/data/{mode}_gram_{model_name}_data_{subset}.h5"
+info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots/info_plot_{model_name}_{mode}"
+gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/data/{mode}_gram_{model_name}_data{subset}.h5"
 
 for d in [reco_path, orig_path, info_plot_path]:
     os.makedirs(d, exist_ok=True)
@@ -103,7 +101,7 @@ if not os.path.exists(gram_matrices_path):
     with h5py.File(gram_matrices_path, "w") as _:
         pass
 
-checkpoint_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/models_checkpoints/class_ckpts_{model_name}"
+checkpoint_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/models_checkpoints/{mode}/class_ckpts_{model_name}"
 Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
 '''
@@ -160,7 +158,7 @@ data_gram_list = []
 #h5f = h5py.File(gram_matrices_path, "a", libver=("latest", "latest"))
 h5f = h5py.File(gram_matrices_path, "a")
 
-for texture_name, texture_loader in class_loaders.items():
+for texture_name, texture_loader in class_subset_loaders.items():
     #print(texture_class)
     #img_index 0-14 because 120(img per class)/8(batch_size)
     #per class checkpoint path
@@ -180,7 +178,7 @@ for texture_name, texture_loader in class_loaders.items():
     last_loss = None
     final_reco_image = None
 
-    for batch, (orig_image, reco_image) in enumerate(zip(texture_loader, gaussian_loader)):
+    for batch, (orig_image, reco_image) in enumerate(zip(texture_loader, gaussian_subset_loaders)):
     #for img_idx, orig_image in enumerate(texture_loader):
         #print(f"img_idx {img_idx}")
         if batch < start_batch:

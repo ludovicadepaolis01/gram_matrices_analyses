@@ -14,6 +14,7 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 from tqdm.auto import trange, tqdm
 
+subset_size = 5
 batch_size = 8
 num_images = 5640
 image_size = (3, 224, 224)
@@ -38,13 +39,13 @@ class GaussianImageDataset(Dataset):
         #    gaussian_img = gaussian_img#.clamp(0, 1)
         return gaussian_img
     
-subset_size = 1
+subset_size = subset_size
 
 gaussian_dataset = GaussianImageDataset()
 gaussian_loader = DataLoader(gaussian_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 subset_indices = list(range(len(gaussian_dataset)))[:subset_size]
 gaussian_subset = Subset(gaussian_dataset, subset_indices)
-gaussian_subset_loaders = DataLoader(gaussian_subset, batch_size=batch_size, shuffle=False)    
+gaussian_subset_loaders = DataLoader(gaussian_subset, batch_size=batch_size, shuffle=True)    
 
 #print(len(train_subset))
 #for batch in gaussian_loader:
