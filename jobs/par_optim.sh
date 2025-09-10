@@ -9,9 +9,9 @@
 #SBATCH --partition=boost_usr_prod # partition name
 #SBATCH --job-name=par_optim
 #SBATCH --mail-type=ALL
-#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/gen_%x.%A.%a.out
-#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/gen_%x.%A.%a.err
-#SBATCH --array=0-14 #total number of models
+#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/optim_gen_%x.%A.%a.out
+#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/optim_gen_%x.%A.%a.err
+#SBATCH --array=0-15 #total number of models
 
 module purge #unload any previously loaded modules to use a clean venv
 module load profile/deeplrn
@@ -37,8 +37,8 @@ wait_for_job() {
 
 jid_pre=$(sbatch --parsable $BASE_OPTS \
     --job-name="${MODEL_NAME}_optimization" \
-    --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_gen_%A.out" \
-    --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_err_%A.err" \
+    --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_gen_%A.out" \
+    --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_err_%A.err" \
     --wrap="python -u image_generation.py --model $MODEL_NAME")
 wait_for_job "$jid_pre"
 
@@ -47,8 +47,8 @@ for i in {1..2}; do
     jid=$(sbatch --parsable $BASE_OPTS \
         --dependency=afterany:$prev_jid \
         --job-name="${MODEL_NAME}_optimization" \
-        --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_gen_%A.out" \
-        --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_err_%A.err" \
+        --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_gen_%A.out" \
+        --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_err_%A.err" \
         --wrap="python -u image_generation.py --model $MODEL_NAME")
     wait_for_job "$jid"
     prev_jid=$jid
