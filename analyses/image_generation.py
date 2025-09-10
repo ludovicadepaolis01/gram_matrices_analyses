@@ -31,7 +31,8 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from models import (
-    VGG16_representations, 
+    VGG16_representations,
+    VGG19_representations, 
     alexnet_representations, 
     resnet18_representations, 
     resnet34_representations, 
@@ -51,6 +52,7 @@ from models import (
 
 model_dict = {
     "vgg16": VGG16_representations,
+    "vgg19": VGG19_representations,
     "alexnet": alexnet_representations,
     "resnet18": resnet18_representations,
     "resnet34": resnet34_representations,
