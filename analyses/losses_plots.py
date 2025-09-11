@@ -2,9 +2,40 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import argparse
 
-path = "/leonardo/home/userexternal/ldepaoli/lab/gram_project/vgg_analyses/info_plots_s30000_20052025/" 
-save_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_project/vgg_analyses/plots/vgg16_losses_textures.png"
+model_list = [
+    "vgg16",
+    "vgg19",
+    "alexnet",
+    "resnet18",
+    "resnet34",
+    "resnet50",
+    "resnet101",
+    "resnet151",
+    "googlenet",
+    "inceptionv3",
+    "squeezenet",
+    "mobilenet",
+    "densenet121",
+    "densenet161",
+    "densenet169",
+    "densenet201"
+]
+
+#parse command-line argument
+parser = argparse.ArgumentParser()
+parser.add_argument("--model", type=str, required=True, choices=[model for model in model_list], 
+                    help="Which model to run")
+#parser.add_argument("--mode", type=str, required=True, choices=["orig", "reco"], 
+#                    help="Gram matrix mode: orig or reco")
+args = parser.parse_args()
+model_name = args.model
+#optim_steps = args.optim_steps
+#mode = args.mode
+
+path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots/info_plot_{model_name}_reco"
+save_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 print(os.listdir(path))
 all_dfs = []
 
@@ -42,9 +73,9 @@ for i, texture in enumerate(sorted_textures):
 
 plt.legend(title="texture labels", bbox_to_anchor=(1.05, 1), loc="upper left")
 
-plt.title("textures generation losses with vgg16")
+plt.title(f"{model_name} textures generation losses")
 plt.xlabel("optim_step")
 plt.ylabel("loss")
 plt.tight_layout()
-plt.savefig(save_path, bbox_inches = "tight", pad_inches=0.1)
-plt.show()
+plt.savefig(os.path.join(save_path, f"{model_name}_generation_losses.png"), bbox_inches = "tight", pad_inches=0.1)
+plt.close()

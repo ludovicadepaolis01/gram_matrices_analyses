@@ -8,10 +8,10 @@ import pandas as pd
 import regex as re
 from scipy.stats import pearsonr
 
-data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/mi_csv.csv"
+subset = 10
+data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/mi_csv_subset_{subset}.csv"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
 scores_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
-subset = 10
 
 df_mi = pd.read_csv(data_path)
 #print(df_mi)
