@@ -11,7 +11,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/optim_gen_%x.%A.%a.out
 #SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/optim_gen_%x.%A.%a.err
-#SBATCH --array=0-15 #total number of models
+##SBATCH --array=0-15 #total number of models
 
 module purge #unload any previously loaded modules to use a clean venv
 module load profile/deeplrn
@@ -21,7 +21,8 @@ source $HOME/virtualenvs/dl/bin/activate
 job_id_file="job_ids_optim.txt"
 > "$job_id_file" #clear the job_ids.txt file at the start
 
-MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet151 googlenet inceptionv3 squeezenet mobilenet densenet121 densenet161 densenet169 densenet201)
+#MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet151 googlenet inceptionv3 squeezenet mobilenet densenet121 densenet161 densenet169 densenet201)
+MODELS=(alexnet)
 MODEL_NAME="${MODELS[$SLURM_ARRAY_TASK_ID]}"
 echo "Running model: $MODEL_NAME"
 
