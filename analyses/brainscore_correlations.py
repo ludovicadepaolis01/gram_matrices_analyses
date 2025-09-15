@@ -8,7 +8,7 @@ import pandas as pd
 import regex as re
 from scipy.stats import pearsonr
 
-subset = 10
+subset = "all"
 data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/mi_csv_subset_{subset}.csv"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
 scores_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
@@ -58,8 +58,8 @@ wanted_cols = [inv_norm[k] for k in wanted_keys if k in inv_norm]
 targets = ["alexnet", "densenet-121", "densenet-169", 
            "densenet-201", "inception_v1", "inception_v3", 
            "resnet_101_v1", "resnet_152_v1", "resnet-18",
-           "resnet-34", "resnet_50_v1", "squeezenet1_1",
-           "vgg_16"]
+           "resnet-34", "resnet_50_v1", "mobilenet_v2_1-4_224_pytorch",
+           "vgg_16", "vgg_19"]
 mask = df_brainscore[model_col].astype(str).str.strip().str.lower().isin([t.lower() for t in targets])
 
 out = df_brainscore.loc[mask, [model_col] + wanted_cols].copy()

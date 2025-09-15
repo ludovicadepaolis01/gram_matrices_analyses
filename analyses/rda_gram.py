@@ -19,7 +19,6 @@ from pathlib import Path
 
 mode = "orig"
 
-'''
 model_list = [
     "vgg16",
     "vgg19",
@@ -31,16 +30,12 @@ model_list = [
     "resnet151",
     "googlenet",
     "inceptionv3",
-    "squeezenet",
     "mobilenet",
     "densenet121",
     "densenet161",
     "densenet169",
     "densenet201"
 ]
-'''
-
-model_list = ["vgg19"]
 
 #parse command-line argument
 parser = argparse.ArgumentParser()

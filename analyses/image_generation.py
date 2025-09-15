@@ -30,7 +30,6 @@ OMP_NUM_THREADS=1
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-'''
 from models import (
     VGG16_representations,
     VGG19_representations, 
@@ -43,7 +42,6 @@ from models import (
     resnet152_representations,
     googlenet_representations,
     inceptionv3_representations,
-    squeezenet_representations,
     mobilenet_representations,
     densenet121_representations,
     densenet161_representations,
@@ -62,20 +60,12 @@ model_dict = {
     "resnet151": resnet152_representations,
     "googlenet": googlenet_representations,
     "inceptionv3": inceptionv3_representations,
-    "squeezenet": squeezenet_representations,
     "mobilenet": mobilenet_representations,
     "densenet121": densenet121_representations,
     "densenet161": densenet161_representations,
     "densenet169": densenet169_representations,
     "densenet201": densenet201_representations,
 }
-'''
-
-from models import (
-    alexnet_representations)
-
-model_dict = {
-    "alexnet": alexnet_representations}
 
 #parse command-line argument
 parser = argparse.ArgumentParser()

@@ -12,7 +12,7 @@ data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csv
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
 output_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
-subset = "10"
+subset = "all"
 
 all_files = glob.glob(os.path.join(data_path, "*.csv"))
 

@@ -21,8 +21,7 @@ source $HOME/virtualenvs/dl/bin/activate
 job_id_file="job_ids_ana.txt"
 > "$job_id_file" #clear the job_ids.txt file at the start
 
-#MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet151 googlenet inceptionv3 squeezenet mobilenet densenet121 densenet161 densenet169 densenet201)
-MODELS=(vgg19)
+MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet151 googlenet inceptionv3 mobilenet densenet121 densenet161 densenet169 densenet201)
 MODEL_NAME="${MODELS[$SLURM_ARRAY_TASK_ID]}"
 echo "Running model: $MODEL_NAME"
 
