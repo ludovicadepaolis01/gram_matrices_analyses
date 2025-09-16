@@ -8,7 +8,7 @@ import pandas as pd
 import regex as re
 import matplotlib.pyplot as plt
 
-data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_data_subset_05092025"
+data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
 output_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
@@ -32,7 +32,10 @@ for class_, cluster in zip(files_classes, files_clusters):
         "cluster_id": df_clusters["cluster_id"]
     })
 
-    mi = ndd.mutual_information(df_joint.to_numpy(dtype=int))
+    mi_nats = ndd.mutual_information(df_joint.to_numpy(dtype=int))
+    #print(mi_nats)
+    mi_bits = mi_nats * np.log2(np.e)
+    #print(mi_bits)
 
     class_string = os.path.basename(class_)
     cluster_string = os.path.basename(cluster)
@@ -42,12 +45,12 @@ for class_, cluster in zip(files_classes, files_clusters):
     model = re.match(model_pattern, class_string).group(1)
     layer = re.search(layer_pattern, class_string).group(0)
 
-    data.append({"model": model, "layer": layer, "mi": mi})
+    data.append({"model": model, "layer": layer, "mi": mi_bits})
 
         #f.write(f"{os.path.basename(class_)} vs {os.path.basename(cluster)} -> MI = {mi}\n\n")
 
 df = pd.DataFrame(data, columns=["model", "layer", "mi"]).reset_index(drop=True)
-mi_csv = df.to_csv(os.path.join(output_path, "mi_csv.csv"))
+mi_csv = df.to_csv(os.path.join(output_path, f"mi_csv_subset_{subset}.csv"))
 #print(df)
 
 df_copy = df.copy()
@@ -67,7 +70,7 @@ for model, group in df_copy.groupby("model"):
                     ha="center", fontsize=8)
 
 ax.set_xlabel("Layers")
-ax.set_ylabel("MI")
+ax.set_ylabel("MI (bits)")
 ax.set_title("MI per model across layers")
 ax.set_xticks([1, 2, 3, 4, 5])
 ax.set_xlim(0.5, 5.5)
@@ -75,5 +78,5 @@ ax.grid(True, alpha=0.3)
 ax.legend(title="Model", loc="best")
 
 plt.tight_layout()
-plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}.png"), bbox_inches="tight")
+plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}_bits.png"), bbox_inches="tight")
 plt.close(fig)

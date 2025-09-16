@@ -18,10 +18,10 @@ df_mi = pd.read_csv(data_path)
 
 #extract top MI per model per layer
 top_mi = df_mi.loc[df_mi.groupby("model")["mi"].idxmax(), ["model","layer","mi"]].reset_index(drop=True)
-#print(top_mi)
+print(top_mi)
 #drop models not present in brainscore
-top_mi = top_mi.drop(index=[3, 7]).reset_index(drop=True)
-#print(top_mi)
+top_mi = top_mi.drop(index=[3]).reset_index(drop=True)
+print(top_mi)
 
 #open brainscore leaderboard which is a bit problematic
 df_brainscore = pd.read_csv(
@@ -71,7 +71,7 @@ out = out.rename(columns=rename_map)
 
 #if there are duplicate models, select only the one with the highest "average_vision" score
 out_best = out.loc[out.groupby(model_col)["average_vision"].idxmax()].reset_index(drop=True)
-
+print(out_best)
 # Optional: dictionary form
 scores = out_best.set_index(model_col).to_dict(orient="index")
 #print(scores)
@@ -102,6 +102,8 @@ for metric in brainscore_values:
     n_values = len(pair)
     #print(n_values)
     if n_values >= 2:
+        print("MI values:", pair["mi"].values)
+        print(f"{metric} values:", pair[metric].values)
         r, p = pearsonr(pair["mi"].astype(float), pair[metric].astype(float))
     rows.append({"metric": metric, "pearson_r": r, "n": n_values, "p_value": p})
 
