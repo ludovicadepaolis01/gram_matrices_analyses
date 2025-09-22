@@ -101,7 +101,7 @@ model_all = combined_df["model"].astype(str)
 valid = mi_all.notna()
 tick_pos = mi_all[valid].values
 tick_labels = [f"{x:.3g}\n{m}" for x, m in zip(tick_pos, model_all[valid])]
-colors = plt.cm.tab10.colors  # distinct colors
+#colors = plt.cm.tab10.colors  # distinct colors
 
 rows = []
 for index, metric in enumerate(brainscore_values):
@@ -127,8 +127,6 @@ for index, metric in enumerate(brainscore_values):
         ax.scatter(
             pair["mi"].values,
             pair[metric].values,
-            color=colors[index % len(colors)],
-            label=metric
         )
         for name, x, y in zip(pair["model"], pair["mi"], pair[metric]):
             ax.annotate(
@@ -140,8 +138,6 @@ for index, metric in enumerate(brainscore_values):
         ax.set_xlabel("best MI values model (bits)")
         ax.set_ylabel(f"brainscore {metric}")
         ax.set_title(f"correlation best MI per {metric}")
-        ax.legend(loc="best", frameon=True, framealpha=0.8)
-        ax.margins(x=0.05, y=0.05)
         fig.tight_layout()
 
     out_png = os.path.join(plot_path, f"correlation_mi_{metric}.png")
@@ -162,7 +158,7 @@ model_to_target = {
     "googlenet":   "inception_v1",
     "inceptionv3": "inception_v3",
     "resnet101":   "resnet_101_v1",
-    "resnet151":   "resnet_152_v1",  # if this is truly 151, adjust target accordingly
+    "resnet151":   "resnet_152_v1", 
     "resnet18":    "resnet-18",
     "resnet34":    "resnet-34",
     "resnet50":    "resnet_50_v1",
@@ -174,37 +170,32 @@ model_to_target = {
 df_mi["target_name"] = df_mi["model"].map(model_to_target)
 df_mi = df_mi.copy()
 combined_df = df_mi.merge(out_best, left_on="target_name", right_on=model_col, how="inner")
-print(combined_df)
+#print(combined_df)
 combined_df.drop(columns=["target_name", "Model"], inplace=True, errors="ignore")
-print(combined_df)
-
-brainscore_values = [c for c in combined_df.columns if c in {"average_vision","neural_vision","behavior_vision","v1","v2","v4","it"}]
-colors = plt.colormaps.get_cmap("tab20")  # many distinct colors
+#print(combined_df)
 
 for metric in brainscore_values:
-    pair = combined_df[["model", "layer", "mi", metric]].dropna(subset=["mi", metric])
+    pair = combined_df[["model", "mi", metric]].dropna(subset=["mi", metric])
     if pair.empty:
         continue
 
-    # fixed, consistent order and color map for models
     models = sorted(pair["model"].unique())
-    color_map = {m: colors(i % colors.N) for i, m in enumerate(models)}
+    cmap = plt.colormaps["tab20"]
+    color_map = {m: cmap(i % cmap.N) for i, m in enumerate(models)}
 
-    fig, ax = plt.subplots(figsize=(15, 10))
+    fig, ax = plt.subplots(figsize=(12, 8))
 
     for m in models:
         pm = pair[pair["model"] == m]
-        #print(pm)
-        ax.lines(pm["mi"].values, pm["layer"],
-                   s=40, alpha=0.9, color=color_map[m], label=m)
+        ax.scatter(pm["mi"].values, pm[metric].values,
+                   s=30, alpha=0.9, color=color_map[m], label=m)
 
     ax.set_xlabel("MI (bits)")
-    ax.set_ylabel(f"layers")
+    ax.set_ylabel(f"{metric}")
     ax.set_title(f"All layers: MI vs {metric}")
-    ax.legend(loc="best", fontsize=9, frameon=True, framealpha=0.8)
-    ax.margins(x=0.05, y=0.05)
+    ax.legend(loc="best", fontsize=8, frameon=True, framealpha=0.8)
     fig.tight_layout()
 
-    out_png = os.path.join(plot_path, f"correlation_all_mi_{metric}.png")
+    out_png = os.path.join(plot_path, f"correlation_allmi_{metric}.png")
     plt.savefig(out_png)
     plt.close(fig)
