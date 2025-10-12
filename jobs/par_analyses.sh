@@ -11,7 +11,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/analyses_out/ana_%x.%A.%3a.out
 #SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/analyses_out/ana_%x.%A.%3a.err
-##SBATCH --array=0-15 #total number of models
+#SBATCH --array=0-15 #total number of models
 
 module purge #unload any previously loaded modules to use a clean venv
 module load profile/deeplrn

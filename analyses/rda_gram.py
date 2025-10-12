@@ -27,7 +27,7 @@ model_list = [
     "resnet34",
     "resnet50",
     "resnet101",
-    "resnet151",
+    "resnet152",
     "googlenet",
     "inceptionv3",
     "mobilenet",
@@ -91,27 +91,27 @@ def hieararchical_clustering_by_mi(
     else:
         done_ks = set()
 
-    all_ks = list(range(2, real_classes+1))
+    all_ks = list(range(2, real_classes+1)) #2-47
     ks = [k for k in all_ks if k not in done_ks]
 
-    pca = pca_function(n_components=3)
-    gram_vectors_proj = pca.fit_transform(gram_vectors_data)
+    #pca = pca_function(n_components=3)
+    #gram_vectors_proj = pca.fit_transform(gram_vectors_data)
     
     for k in ks:#range(2, real_classes+1):
         model = AgglomerativeClustering(n_clusters=k, linkage='ward')
         found_clusters = model.fit_predict(gram_vectors_data)
         data_for_mi = np.column_stack([true_labels, found_clusters])
         mutual_info = mi_function(data_for_mi)    
-        mi_dict[k] = float(mutual_info)
-        label_dict[k] = found_clusters.astype(np.int16)
+        mi_dict[k] = float(mutual_info) #remove float
+        label_dict[k] = found_clusters#.astype(np.int64) #remove astype or use np.int64
 
         ks_done = sorted(set(done_ks) | set(mi_dict.keys())) 
         labels_by_k = {str(kk): label_dict[kk] for kk in label_dict}
         np.savez_compressed(
             ckpt_path,
-            ks_done=np.array(ks_done, dtype=np.int16),
-            mi_dict=np.array(mi_dict, dtype=object),
-            labels_by_k=np.array(labels_by_k, dtype=object)
+            ks_done=np.array(ks_done),#, dtype=np.int16),
+            mi_dict=np.array(mi_dict),# dtype=object),
+            labels_by_k=np.array(labels_by_k) #, dtype=object)
         )
         print(f"ckpt layer {layer_name}: saved k={k}")
 
@@ -161,6 +161,7 @@ def hieararchical_clustering_by_mi(
     #pca = pca_function(n_components=3)
     #gram_vectors_proj = pca.fit_transform(gram_vectors_data)
 
+    '''
     if plot: 
         fname = f"{model_name}_{layer_name}_{mode}_clusters.png"
         #os.makedirs(plot_path, exist_ok=True)
@@ -182,7 +183,8 @@ def hieararchical_clustering_by_mi(
         plt.tight_layout()
         plt.savefig(os.path.join(rdms_path, fname))
         plt.close(fig)
-
+    '''
+        
     codes = true_labels
     return codes, best_k, best_labels, mi_dict, found_clusters_
 
@@ -218,7 +220,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         #vectors = vectors[:200]
         labels = layer_labels[layer]#[:200]
         #print(labels)
-        X = np.stack(vectors, axis=0).astype(np.float32)
+        X = np.stack(vectors, axis=0)#.astype(np.float32)
         #normalize rows for cosine
         norms = np.linalg.norm(X, axis=1, keepdims=True)
         Xn = X/(norms + 1e-12)
@@ -228,6 +230,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         matrix_path = os.path.join(rdms_path, f"{model_name}_{layer}_{mode}_cosine.npy")
         np.save(matrix_path, similarity_matrix)
 
+        '''
         #plot similarity matrix heatmap and save them to $WORK because heavy af
         plt.figure(figsize=(30,30)) #increase resolution con dpi argument
         im = plt.imshow(similarity_matrix, aspect="auto", vmin=0, vmax=1)
@@ -244,6 +247,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         plt.tight_layout()
         plt.close()
         #plt.savefig(os.path.join(plot_path, f"{mode}_rsa_{layer}_s{optim_step}.png"), dpi=200)
+        '''
 
         codes, _ = pd.factorize(np.asanyarray(labels))
 
