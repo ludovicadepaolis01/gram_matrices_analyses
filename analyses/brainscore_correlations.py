@@ -121,7 +121,7 @@ for index, metric in enumerate(brainscore_values):
         #print(f"{metric} values:", pair[metric].values)
         r, p = pearsonr(pair["mi"].astype(float), pair[metric].astype(float))
 
-        fig, ax = plt.subplots(figsize=(15, 12))
+        fig, ax = plt.subplots(figsize=(11, 8))
 
         #scatterplot of best MI values
         ax.scatter(
@@ -133,7 +133,7 @@ for index, metric in enumerate(brainscore_values):
                 str(name),
                 (x, y),
                 xytext=(3, 3), textcoords="offset points",
-                fontsize=10, alpha=0.85
+                fontsize=12, alpha=0.85
             )
         ax.set_xlabel("best MI values model (bits)")
         ax.set_ylabel(f"brainscore {metric}")
@@ -183,7 +183,7 @@ for metric in brainscore_values:
     cmap = plt.colormaps["tab20"]
     color_map = {m: cmap(i % cmap.N) for i, m in enumerate(models)}
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(9, 5))
 
     for m in models:
         pm = pair[pair["model"] == m]
@@ -193,7 +193,7 @@ for metric in brainscore_values:
     ax.set_xlabel("MI (bits)")
     ax.set_ylabel(f"{metric}")
     ax.set_title(f"All layers: MI vs {metric}")
-    ax.legend(loc="best", fontsize=8, frameon=True, framealpha=0.8)
+    ax.legend(loc="best", fontsize=10, frameon=True, framealpha=0.8)
     fig.tight_layout()
 
     out_png = os.path.join(plot_path, f"correlation_allmi_{metric}.png")
