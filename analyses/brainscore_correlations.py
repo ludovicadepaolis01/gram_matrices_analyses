@@ -10,7 +10,7 @@ from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 
 subset = "all"
-data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/mi_csv_subset_{subset}.csv"
+data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/mi_csv_subset_{subset}_k47.csv"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
 scores_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
@@ -135,27 +135,30 @@ for index, metric in enumerate(brainscore_values):
                 xytext=(3, 3), textcoords="offset points",
                 fontsize=13, alpha=0.85
             )
-        ax.set_xlabel("best MI values model (bits)")
-        ax.set_ylabel(f"brainscore {metric}")
-        ax.set_title(f"correlation best MI per {metric}")
+        ax.set_xlim(0, 3.0)
+        ax.set_ylim(0, 0.45)
+        ax.set_xlabel("best MI values model (bits)", fontsize=15)
+        ax.set_ylabel(f"brainscore {metric}", fontsize=15)
+        ax.tick_params(axis='both', which='major', labelsize=15)
+        ax.set_title(f"correlation best MI per {metric}", fontsize=15)
 
         textstr = f"Pearson r = {r:.3f}\np-value = {p:.2e}\nN = {len(pair)}"
         ax.text(
             0.02, 0.02, textstr,
-            transform=ax.transAxes, va="bottom", ha="left", fontsize=12,
+            transform=ax.transAxes, va="bottom", ha="left", fontsize=13,
             bbox=dict(boxstyle="round", facecolor="white", edgecolor="black", alpha=0.8)
         )
 
         fig.tight_layout()
 
-    out_png = os.path.join(plot_path, f"correlation_mi_{metric}.png")
+    out_png = os.path.join(plot_path, f"correlation_mi_{metric}_k47.png")
     plt.savefig(out_png)
     plt.close(fig)
 
     rows.append({"metric": metric, "pearson_r": r, "n": n_values, "p_value": p})
 
 corr_df = pd.DataFrame(rows)#.sort_values("metric").reset_index(drop=True)
-corr_df.to_csv(os.path.join(scores_path, f"mi_brainscores_corr_{subset}.csv"), index=False)
+corr_df.to_csv(os.path.join(scores_path, f"mi_brainscores_corr_{subset}_k47.csv"), index=False)
 #print(corr_df)
 
 model_to_target = {
@@ -198,12 +201,14 @@ for metric in brainscore_values:
         ax.scatter(pm["mi"].values, pm[metric].values,
                    s=30, alpha=0.9, color=color_map[m], label=m)
 
-    ax.set_xlabel("MI (bits)")
-    ax.set_ylabel(f"{metric}")
-    ax.set_title(f"All layers: MI vs {metric}")
-    ax.legend(loc="best", fontsize=10, frameon=True, framealpha=0.8)
+    ax.set_xlim(0, 3.0)
+    ax.set_xlabel("MI (bits)", fontsize=15)
+    ax.set_ylabel(f"{metric}", fontsize=15)
+    ax.set_title(f"All layers: MI vs {metric}", fontsize=15)
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.legend(loc="best", fontsize=12, frameon=True, framealpha=0.8)
     fig.tight_layout()
 
-    out_png = os.path.join(plot_path, f"correlation_allmi_{metric}.png")
+    out_png = os.path.join(plot_path, f"correlation_allmi_{metric}_k47.png")
     plt.savefig(out_png)
     plt.close(fig)

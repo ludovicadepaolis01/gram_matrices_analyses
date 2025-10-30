@@ -9,12 +9,12 @@ import regex as re
 import matplotlib.pyplot as plt
 from natsort import natsorted
 
-data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_all_old"
+data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_k47"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
 output_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
-plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
+plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots/mi_layers_models"
 subset = "all"
-info_metric = "nats"
+info_metric = "bits"
 
 all_files = glob.glob(os.path.join(data_path, "*.csv"))
 
@@ -22,16 +22,6 @@ files_classes  = natsorted([f for f in all_files if "real_classes"   in os.path.
 #print(files_classes)
 files_clusters = natsorted([f for f in all_files if "found_clusters" in os.path.basename(f)])
 #print(files_clusters)
-
-'''
-files_classes  = sorted(
-    [f for f in all_files if "real_classes" in os.path.basename(f)],
-    key=lambda x: int(re.search(r"(\d+)(?=_[^_]+\.csv$)", x).group(1))
-)
-print(files_classes)
-files_clusters = sorted([file for file in all_files if "found_clusters" in os.path.basename(file)])
-print(files_clusters)
-'''
 
 #with open(os.path.join(output_path, "output.txt"), "w") as f:
 
@@ -56,12 +46,12 @@ for class_, cluster in zip(files_classes, files_clusters):
     print(layer) 
     print(f"{mi_bits}\n\n") 
     print(df_joint) 
-    data.append({"model": model, "layer": layer, "mi": mi_nats}) 
+    data.append({"model": model, "layer": layer, "mi": mi_bits}) 
     
     #f.write(f"{os.path.basename(class_)} vs {os.path.basename(cluster)} -> MI = {mi}\n\n") 
     
 df = pd.DataFrame(data, columns=["model", "layer", "mi"]).reset_index(drop=True) 
-mi_csv = df.to_csv(os.path.join(output_path, f"mi_csv_subset_{subset}.csv")) 
+mi_csv = df.to_csv(os.path.join(output_path, f"mi_csv_subset_{subset}_k47.csv")) 
 #print(df) 
 
 df_copy = df.copy() 
@@ -77,16 +67,17 @@ for model, group in df_copy.groupby("model"):
     # optional: annotate each point with the true layer index
     for x, y, idx in zip(group["pos"], group["mi"], group["layer_idx"]):
         ax.annotate(str(idx), (x, y), textcoords="offset points", xytext=(0, 6),
-                    ha="center", fontsize=8)
+                    ha="center", fontsize=9)
 
-ax.set_xlabel("Layers")
-ax.set_ylabel(f"MI ({info_metric})")
-ax.set_title("MI per model across layers")
+ax.set_xlabel("Layers", fontsize=15)
+ax.set_ylabel(f"MI ({info_metric})", fontsize=15)
+ax.set_title("MI per model across layers", fontsize=15)
 ax.set_xticks([1, 2, 3, 4, 5])
 ax.set_xlim(0.5, 5.5)
+ax.tick_params(axis='both', which='major', labelsize=15)
 ax.grid(True, alpha=0.3)
 ax.legend(title="Model", loc="best")
 
 plt.tight_layout()
-plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}_{info_metric}.png"), bbox_inches="tight")
+plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}_{info_metric}_k47.png"), bbox_inches="tight")
 plt.close(fig)
