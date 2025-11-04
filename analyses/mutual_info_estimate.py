@@ -8,6 +8,8 @@ import pandas as pd
 import regex as re
 import matplotlib.pyplot as plt
 from natsort import natsorted
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
 data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_k47"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
@@ -61,23 +63,30 @@ df_copy = df_copy.sort_values(["model", "layer_idx"])
 df_copy["pos"] = df_copy.groupby("model").cumcount() + 1
 
 # 3) Plot: one line per model, x = 1..5, y = MI
-fig, ax = plt.subplots(figsize=(15, 10))
-for model, group in df_copy.groupby("model"):
-    ax.plot(group["pos"], group["mi"], marker="o", label=model)
+fig, ax = plt.subplots(figsize=(15, 10),
+                       constrained_layout=True,)
+
+models = sorted(df_copy["model"].unique())
+colors = cm.get_cmap("tab20", len(models)) 
+
+for i, (model, group) in enumerate(df_copy.groupby("model")):
+    ax.plot(group["pos"], group["mi"], marker="o", label=model, color=colors(i))
+    '''
     # optional: annotate each point with the true layer index
     for x, y, idx in zip(group["pos"], group["mi"], group["layer_idx"]):
         ax.annotate(str(idx), (x, y), textcoords="offset points", xytext=(0, 6),
                     ha="center", fontsize=9)
+    '''
 
-ax.set_xlabel("Layers", fontsize=15)
+ax.set_xlabel("Layer indices (1-5)", fontsize=15)
 ax.set_ylabel(f"MI ({info_metric})", fontsize=15)
-ax.set_title("MI per model across layers", fontsize=15)
+#ax.set_title("MI per model across layers", fontsize=15)
 ax.set_xticks([1, 2, 3, 4, 5])
 ax.set_xlim(0.5, 5.5)
 ax.tick_params(axis='both', which='major', labelsize=15)
 ax.grid(True, alpha=0.3)
 ax.legend(title="Model", loc="best")
 
-plt.tight_layout()
+#plt.tight_layout()
 plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}_{info_metric}_k47.png"), bbox_inches="tight")
 plt.close(fig)
