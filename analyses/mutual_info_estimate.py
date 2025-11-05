@@ -21,9 +21,7 @@ info_metric = "bits"
 all_files = glob.glob(os.path.join(data_path, "*.csv"))
 
 files_classes  = natsorted([f for f in all_files if "real_classes"   in os.path.basename(f)])
-#print(files_classes)
 files_clusters = natsorted([f for f in all_files if "found_clusters" in os.path.basename(f)])
-#print(files_clusters)
 
 #with open(os.path.join(output_path, "output.txt"), "w") as f:
 
@@ -34,7 +32,6 @@ for class_, cluster in zip(files_classes, files_clusters):
     df_joint = pd.DataFrame({ "true_classes": df_classes["true_classes"], "cluster_id": df_clusters["cluster_id"] }) 
     
     mi_nats = ndd.mutual_information(df_joint.to_numpy(dtype=int)) 
-    #print(mi_nats) 
     mi_bits = mi_nats * np.log2(np.e) 
 
     class_string = os.path.basename(class_) 
@@ -54,7 +51,6 @@ for class_, cluster in zip(files_classes, files_clusters):
     
 df = pd.DataFrame(data, columns=["model", "layer", "mi"]).reset_index(drop=True) 
 mi_csv = df.to_csv(os.path.join(output_path, f"mi_csv_subset_{subset}_k47.csv")) 
-#print(df) 
 
 df_copy = df.copy() 
 df_copy["layer_idx"] = df_copy["layer"].str.extract(r"(\d+)$").astype(int) 
@@ -86,7 +82,5 @@ ax.set_xlim(0.5, 5.5)
 ax.tick_params(axis='both', which='major', labelsize=15)
 ax.grid(True, alpha=0.3)
 ax.legend(title="Model", loc="best")
-
-#plt.tight_layout()
 plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}_{info_metric}_k47.png"), bbox_inches="tight")
 plt.close(fig)
