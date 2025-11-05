@@ -77,6 +77,7 @@ ax.set_xticks([1, 2, 3, 4, 5])
 ax.set_xlim(0.5, 5.5)
 ax.tick_params(axis='both', which='major', labelsize=15)
 ax.grid(True, alpha=0.3)
-ax.legend(title="Model", loc="best")
+leg = ax.legend(title="Model", loc="best", fontsize=11)
+leg.get_title().set_fontsize(11)  #title font size
 plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{subset}_{info_metric}_k47.png"), bbox_inches="tight")
 plt.close(fig)

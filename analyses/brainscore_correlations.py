@@ -143,13 +143,13 @@ for index, metric in enumerate(brainscore_values):
         models = pair["model"].astype(str).unique()
         colors = cm.get_cmap("tab20", len(models))
 
-        for i, model in enumerate(models):
+        for index, model in enumerate(models):
             mask = (pair["model"].astype(str) == model)
             #scatterplot of best MI values
             ax.scatter(
                 pair.loc[mask, "mi"].values,
                 pair.loc[mask, metric].values,
-                color=colors(i),
+                color=colors(index),
                 label=model, #one legend entry per model
                 s=80, #point size
             )
@@ -167,7 +167,8 @@ for index, metric in enumerate(brainscore_values):
             ax.set_ylabel(f"Brainscore {pretty_metric}", fontsize=15)
             ax.tick_params(axis='both', which='major', labelsize=15)
             #ax.set_title(f"correlation best MI per {metric}", fontsize=15)
-            ax.legend(title="Model", loc="upper left")
+            leg = ax.legend(title="Model", loc="upper left", fontsize=15)
+            leg.get_title().set_fontsize(15)  # title font size
 
             textstr = f"Pearson r = {r:.3f}\np-value = {p:.2e}\nN = {len(pair)}"
             ax.text(
@@ -222,14 +223,15 @@ for metric in brainscore_values:
         pm = pair[pair["model"] == model]
         display_name = pretty_model_names.get(model, model)
         ax.scatter(pm["mi"].values, pm[metric].values,
-                   s=30, alpha=0.9, color=colors[j], label=display_name)
+                   s=30, alpha=0.9, color=colors(index), label=display_name)
 
     ax.set_xlim(0, 3.0)
     ax.set_xlabel("MI (bits)", fontsize=15)
     ax.set_ylabel(f"{pretty_metric}", fontsize=15)
     #ax.set_title(f"All layers: MI vs {metric}", fontsize=15)
     ax.tick_params(axis='both', which='major', labelsize=15)
-    ax.legend(title="Model", loc="upper left", fontsize=12, frameon=True, framealpha=0.8)
+    leg = ax.legend(title="Model", loc="upper left", fontsize=12, frameon=True, framealpha=0.8)
+    leg.get_title().set_fontsize(15)  # title font size
     out_png = os.path.join(plot_path, f"correlation_allmi_{metric}_k47.png")
     plt.savefig(out_png)
     plt.close(fig)
