@@ -40,11 +40,7 @@ for class_, cluster in zip(files_classes, files_clusters):
     model_pattern = re.compile(r"^([^_]+)") 
     layer_pattern = re.compile(r"layer_(?:layer|bn\d*|conv)_\d+") 
     model = re.match(model_pattern, class_string).group(1) 
-    print(model) 
     layer = re.search(layer_pattern, class_string).group(0) 
-    print(layer) 
-    print(f"{mi_bits}\n\n") 
-    print(df_joint) 
     data.append({"model": model, "layer": layer, "mi": mi_bits}) 
     
     #f.write(f"{os.path.basename(class_)} vs {os.path.basename(cluster)} -> MI = {mi}\n\n") 
