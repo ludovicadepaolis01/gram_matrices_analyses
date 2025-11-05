@@ -19,6 +19,41 @@ plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plo
 
 df_mi = pd.read_csv(data_path)
 
+#model mask
+pretty_model_names = {
+    "alexnet":      "AlexNet",
+    "densenet121":  "DenseNet-121",
+    "densenet169":  "DenseNet-169",
+    "densenet201":  "DenseNet-201",
+    "googleget":    "GoogleNet",
+    "inceptionv3":  "InceptionV3",
+    "mobilenet":    "MobileNetV2",
+    "resnet18":     "ResNet18",
+    "resnet34":     "ResNet34",
+    "resnet50":     "ResNet50",
+    "resnet101":    "ResNet101",
+    "resnet152":    "ResNet152",
+    "vgg16":        "VGG-16",
+    "vgg19":        "VGG-19",
+}
+
+#brainscore mask
+targets = ["alexnet", "densenet-121", "densenet-169", 
+           "densenet-201", "inception_v1", "inception_v3", 
+           "resnet_101_v1", "resnet_152_v1", "resnet-18",
+           "resnet-34", "resnet_50_v1", "mobilenet_v2_1-4_224_pytorch",
+           "vgg_16", "vgg_19"]
+
+pretty_names = {
+    "average_vision":  "Average Vision",
+    "neural_vision":   "Neural Vision",
+    "behavior_vision": "Behavior Vision",
+    "v1":              "V1",
+    "v2":              "V2",
+    "v4":              "V4",
+    "it":              "IT",
+}
+
 #extract top MI per model per layer
 top_mi = df_mi.loc[df_mi.groupby("model")["mi"].idxmax(), ["model","layer","mi"]].reset_index(drop=True)
 #drop models not present in brainscore
@@ -58,11 +93,6 @@ wanted_keys = ["average_vision", "neural_vision", "behavior_vision", "v1", "v2",
 wanted_cols = [inv_norm[k] for k in wanted_keys if k in inv_norm]
 
 # Filter the two models (case-insensitive, exact match after strip)
-targets = ["alexnet", "densenet-121", "densenet-169", 
-           "densenet-201", "inception_v1", "inception_v3", 
-           "resnet_101_v1", "resnet_152_v1", "resnet-18",
-           "resnet-34", "resnet_50_v1", "mobilenet_v2_1-4_224_pytorch",
-           "vgg_16", "vgg_19"]
 mask = df_brainscore[model_col].astype(str).str.strip().str.lower().isin([t.lower() for t in targets])
 
 out = df_brainscore.loc[mask, [model_col] + wanted_cols].copy()
@@ -97,6 +127,7 @@ tick_labels = [f"{x:.3g}\n{m}" for x, m in zip(tick_pos, model_all[valid])]
 rows = []
 for index, metric in enumerate(brainscore_values):
 
+    pretty_metric = pretty_names.get(metric, metric)
     brain_score = pd.to_numeric(combined_df[metric], errors="coerce")
     mi_score = pd.to_numeric(combined_df["mi"], errors="coerce")
     pair = pd.DataFrame({"model": combined_df["model"],
@@ -133,7 +164,7 @@ for index, metric in enumerate(brainscore_values):
             ax.set_xlim(0, 3.0)
             ax.set_ylim(0, 0.45)
             ax.set_xlabel("MI value (bits)", fontsize=15)
-            ax.set_ylabel(f"Brainscore {metric}", fontsize=15)
+            ax.set_ylabel(f"Brainscore {pretty_metric}", fontsize=15)
             ax.tick_params(axis='both', which='major', labelsize=15)
             #ax.set_title(f"correlation best MI per {metric}", fontsize=15)
             ax.legend(title="Model", loc="upper left")
@@ -155,20 +186,20 @@ corr_df = pd.DataFrame(rows)#.sort_values("metric").reset_index(drop=True)
 corr_df.to_csv(os.path.join(scores_path, f"mi_brainscores_corr_{subset}_k47.csv"), index=False)
 
 model_to_target = {
-    "AlexNet":     "alexnet",
-    "DenseNet-121": "densenet-121",
-    "DenseNet-169": "densenet-169",
-    "DenseNet-201": "densenet-201",
-    "GoogleNet":   "inception_v1",
-    "Inception-v3": "inception_v3",
-    "MobileNetV2":   "mobilenet_v2_1-4_224_pytorch",
-    "Resnet18":    "resnet-18",
-    "Resnet34":    "resnet-34",
-    "Resnet50":    "resnet_50_v1",
-    "Resnet101":   "resnet_101_v1",
-    "Resnet152":   "resnet_152_v1", 
-    "VGG-16":       "vgg_16",
-    "VGG-19":       "vgg_19",
+    "alexnet":     "alexnet",
+    "densenet121": "densenet-121",
+    "densenet169": "densenet-169",
+    "densenet201": "densenet-201",
+    "googlenet":   "inception_v1",
+    "inceptionv3": "inception_v3",
+    "mobilenet":   "mobilenet_v2_1-4_224_pytorch",
+    "resnet18":    "resnet-18",
+    "resnet34":    "resnet-34",
+    "resnet50":    "resnet_50_v1",
+    "resnet101":   "resnet_101_v1",
+    "resnet152":   "resnet_152_v1", 
+    "vgg16":       "vgg_16",
+    "vgg19":       "vgg_19",
 }
 
 df_mi["target_name"] = df_mi["model"].map(model_to_target)
@@ -187,14 +218,15 @@ for metric in brainscore_values:
     models = sorted(pair["model"].unique())
     colors = cm.get_cmap("tab20", len(models))
 
-    for m in models:
-        pm = pair[pair["model"] == m]
+    for index, model in enumerate(models):
+        pm = pair[pair["model"] == model]
+        display_name = pretty_model_names.get(model, model)
         ax.scatter(pm["mi"].values, pm[metric].values,
-                   s=30, alpha=0.9, color=colors[m], label=m)
+                   s=30, alpha=0.9, color=colors[j], label=display_name)
 
     ax.set_xlim(0, 3.0)
     ax.set_xlabel("MI (bits)", fontsize=15)
-    ax.set_ylabel(f"{metric}", fontsize=15)
+    ax.set_ylabel(f"{pretty_metric}", fontsize=15)
     #ax.set_title(f"All layers: MI vs {metric}", fontsize=15)
     ax.tick_params(axis='both', which='major', labelsize=15)
     ax.legend(title="Model", loc="upper left", fontsize=12, frameon=True, framealpha=0.8)
