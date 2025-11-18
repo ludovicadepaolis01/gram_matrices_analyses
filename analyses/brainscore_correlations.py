@@ -12,8 +12,8 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
 subset = "all"
-data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/mi_csv_subset_{subset}_k47.csv"
-brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
+data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/mi_csv_subset_{subset}_k47.csv"
+brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/leaderboard.csv"
 scores_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 
@@ -44,7 +44,7 @@ targets = ["alexnet", "densenet-121", "densenet-169",
            "resnet-34", "resnet_50_v1", "mobilenet_v2_1-4_224_pytorch",
            "vgg_16", "vgg_19"]
 
-pretty_names = {
+pretty_metric_names = {
     "average_vision":  "Average Vision",
     "neural_vision":   "Neural Vision",
     "behavior_vision": "Behavior Vision",
@@ -127,7 +127,7 @@ tick_labels = [f"{x:.3g}\n{m}" for x, m in zip(tick_pos, model_all[valid])]
 rows = []
 for index, metric in enumerate(brainscore_values):
 
-    pretty_metric = pretty_names.get(metric, metric)
+    pretty_metric = pretty_metric_names.get(metric, metric)
     brain_score = pd.to_numeric(combined_df[metric], errors="coerce")
     mi_score = pd.to_numeric(combined_df["mi"], errors="coerce")
     pair = pd.DataFrame({"model": combined_df["model"],
@@ -140,22 +140,23 @@ for index, metric in enumerate(brainscore_values):
 
         fig, ax = plt.subplots(figsize=(14, 10),
                                constrained_layout=True,)
-        models = pair["model"].astype(str).unique()
+        models = sorted(pair["model"].astype(str).unique())
         colors = cm.get_cmap("tab20", len(models))
 
         for index, model in enumerate(models):
             mask = (pair["model"].astype(str) == model)
+            pretty_model = pretty_model_names.get(model, model)
             #scatterplot of best MI values
             ax.scatter(
                 pair.loc[mask, "mi"].values,
                 pair.loc[mask, metric].values,
                 color=colors(index),
-                label=model, #one legend entry per model
+                label=pretty_model, #one legend entry per model
                 s=80, #point size
             )
             for x, y in zip(pair.loc[mask, "mi"], pair.loc[mask, metric]):
                 ax.annotate(
-                    model,
+                    pretty_model,
                     (x, y),
                     xytext=(3, 3),
                     textcoords="offset points",
