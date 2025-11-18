@@ -25,7 +25,6 @@ pretty_model_names = {
     "densenet121":  "DenseNet-121",
     "densenet169":  "DenseNet-169",
     "densenet201":  "DenseNet-201",
-    "googleget":    "GoogleNet",
     "inceptionv3":  "InceptionV3",
     "mobilenet":    "MobileNetV2",
     "resnet18":     "ResNet18",
@@ -39,7 +38,7 @@ pretty_model_names = {
 
 #brainscore mask
 targets = ["alexnet", "densenet-121", "densenet-169", 
-           "densenet-201", "inception_v1", "inception_v3", 
+           "densenet-201", "inception_v3", 
            "resnet_101_v1", "resnet_152_v1", "resnet-18",
            "resnet-34", "resnet_50_v1", "mobilenet_v2_1-4_224_pytorch",
            "vgg_16", "vgg_19"]
@@ -57,7 +56,9 @@ pretty_metric_names = {
 #extract top MI per model per layer
 top_mi = df_mi.loc[df_mi.groupby("model")["mi"].idxmax(), ["model","layer","mi"]].reset_index(drop=True)
 #drop models not present in brainscore
+top_mi = top_mi[top_mi["model"] != "googlenet"]
 top_mi = top_mi.reset_index(drop=True)
+print(top_mi)
 
 #open brainscore leaderboard which is a bit problematic
 df_brainscore = pd.read_csv(
@@ -192,7 +193,6 @@ model_to_target = {
     "densenet121": "densenet-121",
     "densenet169": "densenet-169",
     "densenet201": "densenet-201",
-    "googlenet":   "inception_v1",
     "inceptionv3": "inception_v3",
     "mobilenet":   "mobilenet_v2_1-4_224_pytorch",
     "resnet18":    "resnet-18",
