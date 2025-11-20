@@ -15,7 +15,7 @@ import matplotlib.colors as mcolors
 data_path = "/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/csvs_k47"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/leaderboard.csv"
 output_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
-plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots/mi_layers_models"
+plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 subset = "all"
 info_metric = "bits"
 
@@ -45,7 +45,7 @@ for class_, cluster in zip(files_classes, files_clusters):
     df_classes = pd.read_csv(class_) 
     df_clusters = pd.read_csv(cluster) 
     df_joint = pd.DataFrame({ "true_classes": df_classes["true_classes"], "cluster_id": df_clusters["cluster_id"] }) 
-    
+
     mi_nats = ndd.mutual_information(df_joint.to_numpy(dtype=int)) 
     mi_bits = mi_nats * np.log2(np.e) 
 
@@ -64,6 +64,7 @@ df = pd.DataFrame(data, columns=["model", "layer", "mi"]).reset_index(drop=True)
 mi_csv = df.to_csv(os.path.join(output_path, f"mi_csv_subset_{subset}_k47.csv")) 
 
 df_copy = df.copy() 
+df_copy = df_copy[df_copy["model"] != "googlenet"]
 df_copy["layer_idx"] = df_copy["layer"].str.extract(r"(\d+)$").astype(int) 
 df_copy = df_copy.sort_values(["model", "layer_idx"])
 # 2) For each model, assign x = 1..5 (position in that model after sorting)
