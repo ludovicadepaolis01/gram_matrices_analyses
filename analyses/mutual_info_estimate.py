@@ -1,4 +1,5 @@
 import torch
+
 import os
 import numpy as np
 import sklearn
@@ -11,8 +12,8 @@ from natsort import natsorted
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
-data_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_k47"
-brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/leaderboard.csv"
+data_path = "/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/csvs_k47"
+brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/leaderboard.csv"
 output_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots/mi_layers_models"
 subset = "all"
@@ -23,7 +24,21 @@ all_files = glob.glob(os.path.join(data_path, "*.csv"))
 files_classes  = natsorted([f for f in all_files if "real_classes"   in os.path.basename(f)])
 files_clusters = natsorted([f for f in all_files if "found_clusters" in os.path.basename(f)])
 
-#with open(os.path.join(output_path, "output.txt"), "w") as f:
+pretty_model_names = {
+    "alexnet":      "AlexNet",
+    "densenet121":  "DenseNet-121",
+    "densenet169":  "DenseNet-169",
+    "densenet201":  "DenseNet-201",
+    "inceptionv3":  "InceptionV3",
+    "mobilenet":    "MobileNetV2",
+    "resnet18":     "ResNet18",
+    "resnet34":     "ResNet34",
+    "resnet50":     "ResNet50",
+    "resnet101":    "ResNet101",
+    "resnet152":    "ResNet152",
+    "vgg16":        "VGG-16",
+    "vgg19":        "VGG-19",
+}
 
 data = [] 
 for class_, cluster in zip(files_classes, files_clusters): 
@@ -62,7 +77,7 @@ models = sorted(df_copy["model"].unique())
 colors = cm.get_cmap("tab20", len(models)) 
 
 for i, (model, group) in enumerate(df_copy.groupby("model")):
-    ax.plot(group["pos"], group["mi"], marker="o", label=model, color=colors(i))
+    ax.plot(group["pos"], group["mi"], marker="o", label=pretty_model_names.get(model, model), color=colors(i))
     '''
     # optional: annotate each point with the true layer index
     for x, y, idx in zip(group["pos"], group["mi"], group["layer_idx"]):
