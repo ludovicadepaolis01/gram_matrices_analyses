@@ -126,6 +126,119 @@ tick_pos = mi_all[valid].values
 tick_labels = [f"{x:.3g}\n{m}" for x, m in zip(tick_pos, model_all[valid])]
 
 rows = []
+
+n_metrics = len(brainscore_values)
+n_cols = 4
+n_rows = int(np.ceil(n_metrics / n_cols))
+
+fig, axes = plt.subplots(
+    n_rows, n_cols,
+    figsize=(4 * n_cols, 4 * n_rows),
+    constrained_layout=True,
+)
+axes = np.atleast_1d(axes).reshape(n_rows, n_cols)
+
+# shared models + colors
+all_models = sorted(combined_df["model"].astype(str).unique())
+cmap = cm.get_cmap("tab20", len(all_models))
+model_to_color = {m: cmap(i) for i, m in enumerate(all_models)}
+
+for i_metric, metric in enumerate(brainscore_values):
+    pretty_metric = pretty_metric_names.get(metric, metric)
+
+    row = i_metric // n_cols
+    col = i_metric % n_cols
+    ax = axes[row, col]
+
+    brain_score = pd.to_numeric(combined_df[metric], errors="coerce")
+    mi_score = pd.to_numeric(combined_df["mi"], errors="coerce")
+    pair = pd.DataFrame(
+        {"model": combined_df["model"], "mi": mi_score, metric: brain_score}
+    ).dropna(subset=["mi", metric])
+
+    n_values = len(pair)
+    if n_values < 2:
+        ax.set_visible(False)
+        continue
+
+    r, p = pearsonr(pair["mi"].astype(float), pair[metric].astype(float))
+
+    # scatter...
+    for model in all_models:
+        mask = (pair["model"].astype(str) == model)
+        if not mask.any():
+            continue
+        ax.scatter(
+            pair.loc[mask, "mi"].values,
+            pair.loc[mask, metric].values,
+            color=model_to_color[model],
+            s=80,
+        )
+
+    ax.set_xlim(0, 3.0)
+    ax.set_ylim(0, 0.45)
+    ax.tick_params(axis="both", which="major", labelsize=10)
+
+    # Title at the top
+    ax.set_title(pretty_metric, fontsize=12, pad=8)
+
+    # ---- AXIS LABELS ONLY ON SELECTED SUBPLOTS ----
+    # y-label on "Average Vision" and "V2"
+    if pretty_metric in ["Average Vision", "V2"]:
+        ax.set_ylabel("Brainscore", fontsize=14)
+
+    # x-label on "V2", "V4", and "IT"
+    if pretty_metric in ["V2", "V4", "IT"]:
+        ax.set_xlabel("MI value (bits)", fontsize=14)
+
+    # correlation box
+    textstr = f"Pearson r = {r:.3f}\np-value = {p:.2e}\nN = {n_values}"
+    ax.text(
+        0.02, 0.02, textstr,
+        transform=ax.transAxes,
+        va="bottom", ha="left", fontsize=10,
+        bbox=dict(boxstyle="round", facecolor="white",
+                  edgecolor="black", alpha=0.8),
+    )
+
+    rows.append({"metric": metric, "pearson_r": r, "n": n_values, "p_value": p})
+
+# hide unused axes
+for j in range(i_metric + 1, n_rows * n_cols):
+    row = j // n_cols
+    col = j % n_cols
+    axes[row, col].set_visible(False)
+
+
+handles = [
+    plt.Line2D([], [], marker="o", linestyle="",
+               markersize=8, color=model_to_color[m])
+    for m in all_models
+]
+labels = [pretty_model_names.get(m, m) for m in all_models]
+
+fig.legend(
+    handles, labels,
+    title="Model",
+    loc="center right",          # attach to the left side of the anchor
+    bbox_to_anchor=(0.8, 0.3), # (x,y) in figure coords: right side, middle
+    borderaxespad=0.,
+    fontsize=10,
+    title_fontsize=11,
+)
+
+# leave room on the right for the legend (xmax < 1)
+plt.tight_layout(rect=[0.06, 0.06, 0.85, 0.95])
+out_png = os.path.join(plot_path, "correlation_mi_all_brainscores_k47.png")
+plt.savefig(out_png)
+plt.close(fig)
+
+corr_df = pd.DataFrame(rows)
+corr_df.to_csv(os.path.join(scores_path, f"mi_brainscores_corr_{subset}_k47.csv"),
+               index=False)
+
+'''
+rows = []
 for index, metric in enumerate(brainscore_values):
 
     pretty_metric = pretty_metric_names.get(metric, metric)
@@ -187,7 +300,8 @@ for index, metric in enumerate(brainscore_values):
 
 corr_df = pd.DataFrame(rows)#.sort_values("metric").reset_index(drop=True)
 corr_df.to_csv(os.path.join(scores_path, f"mi_brainscores_corr_{subset}_k47.csv"), index=False)
-
+'''
+'''
 model_to_target = {
     "alexnet":     "alexnet",
     "densenet121": "densenet-121",
@@ -236,3 +350,4 @@ for metric in brainscore_values:
     out_png = os.path.join(plot_path, f"correlation_allmi_{metric}_k47.png")
     plt.savefig(out_png)
     plt.close(fig)
+'''
