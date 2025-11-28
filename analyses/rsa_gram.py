@@ -224,7 +224,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         np.save(matrix_path, similarity_matrix)
 
         #plot similarity matrix heatmap 
-        plt.figure(figsize=(20, 20)) #increase resolution with dpi argument, not recommended
+        plt.figure(figsize=(15, 15)) #increase resolution with dpi argument, not recommended
         im = plt.imshow(similarity_matrix, aspect="auto", vmin=0, vmax=1)
         cbar = plt.colorbar(im, fraction=0.046, pad=0.04)
         cbar.ax.tick_params(labelsize=50)
