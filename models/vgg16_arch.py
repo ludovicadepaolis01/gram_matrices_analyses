@@ -62,7 +62,6 @@ class VGG16_representations(nn.Module):
 
           #check if gram matrices (list) are not transferred from gpu to cpu from time to time
           #this could slow down the whole learning process
-          #
           for key in self.feature_maps:
                feature_map = self.feature_maps[key]
                feature_map_height = feature_map.size(2)
