@@ -9,9 +9,9 @@
 #SBATCH --partition=boost_usr_prod # partition name
 #SBATCH --job-name=par_optim
 #SBATCH --mail-type=ALL
-#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/optim_gen_%x.%A.%a.out
-#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/optim_gen_%x.%A.%a.err
-##SBATCH --array=0-15 #total number of models
+#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/par_optim_%x.%A.%a.out
+#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/par_optim_%x.%A.%a.err
+#SBATCH --array=0-13 #total number of models
 
 module purge #unload any previously loaded modules to use a clean venv
 module load profile/deeplrn
@@ -21,8 +21,7 @@ source $HOME/virtualenvs/dl/bin/activate
 job_id_file="job_ids_optim.txt"
 > "$job_id_file" #clear the job_ids.txt file at the start
 
-MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet151 googlenet inceptionv3 mobilenet densenet121 densenet161 densenet169 densenet201)
-#MODELS=(alexnet)
+MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet152 inceptionv3 mobilenet densenet121 densenet169 densenet201)
 MODEL_NAME="${MODELS[$SLURM_ARRAY_TASK_ID]}"
 echo "Running model: $MODEL_NAME"
 
@@ -38,9 +37,9 @@ wait_for_job() {
 
 jid_pre=$(sbatch --parsable $BASE_OPTS \
     --job-name="${MODEL_NAME}_optimization" \
-    --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_gen_%A.out" \
-    --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_err_%A.err" \
-    --wrap="python -u image_generation.py --model $MODEL_NAME")
+    --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_gen_%A.out" \
+    --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_err_%A.err" \
+    --wrap="python -u image_optimization.py --model $MODEL_NAME")
 wait_for_job "$jid_pre"
 
 prev_jid=$jid_pre
@@ -48,9 +47,9 @@ for i in {1..2}; do
     jid=$(sbatch --parsable $BASE_OPTS \
         --dependency=afterany:$prev_jid \
         --job-name="${MODEL_NAME}_optimization" \
-        --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_gen_%A.out" \
-        --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/gen_out/${MODEL_NAME}_optim_err_%A.err" \
-        --wrap="python -u image_generation.py --model $MODEL_NAME")
+        --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_gen_%A.out" \
+        --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_err_%A.err" \
+        --wrap="python -u image_optimization.py --model $MODEL_NAME")
     wait_for_job "$jid"
     prev_jid=$jid
 done

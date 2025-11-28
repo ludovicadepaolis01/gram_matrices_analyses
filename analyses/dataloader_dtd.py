@@ -1,33 +1,23 @@
-import torch.utils
-import torch.utils.data
-import h5py
-import matplotlib.pyplot as plt
 import torch
-import torchvision.utils as u
 import os
-import numpy as np
 import torch 
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader, Subset, ConcatDataset
 from torchvision.transforms import Compose
 from PIL import Image
-from sklearn.model_selection import train_test_split
-from tqdm.auto import trange, tqdm
 
-subset_size = 5
+subset_size = 10
 batch_size = 8
 
 img_path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/clip_textures/data/dtd/images"
 img_dir = os.listdir(img_path)
 
 #prepare images
-
 img_dict = {}
 for texture_class in img_dir:
     class_path = os.path.join(img_path, texture_class)
     if os.path.isdir(class_path):
         img_list = []
-        #class_dir = os.listdir(class_path)
         for img in os.listdir(class_path):
             file_path = os.path.join(class_path, img)
             try:
@@ -37,11 +27,8 @@ for texture_class in img_dir:
                 print(f"Error processing {file_path}: {e}")
         img_dict[texture_class] = img_list
 
-#print(img_dict)
-
 #params for image transformations
-resize = 224 #from 425?
-#crop = 224
+resize = 224
 image_index = 0
 
 #params for train and test splitting
@@ -52,28 +39,16 @@ random_state = 42
 class ImgDataset(Dataset):
     def __init__(self, img_list, resize=resize):
         self.img_list = img_list
-        #self.preprocess = preprocess
-        '''
-        self.transform = Compose([
-            transforms.RandomCrop(crop),
-            transforms.RandomHorizontalFlip(), 
-            transforms.RandomVerticalFlip()
-        ])
-        '''
 
         #add a preload transformation variable that contains the heaviest(?) transformations
         self.transform = Compose([
             transforms.Resize((resize, resize)),
             transforms.ToTensor(),
-            transforms.Normalize((0.5137, 0.4639, 0.4261), (0.2576, 0.2330, 0.2412))
-            #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            transforms.Normalize((0.5137, 0.4639, 0.4261), (0.2576, 0.2330, 0.2412)),
         ])
 
     def __len__(self):
-        #print(len(self.dir))
         return len(self.img_list)
-        #return 1 #if you want to process only the first image of the dataset
-
     
     def __getitem__(self, index):
         img = self.img_list[index]
@@ -89,7 +64,7 @@ class_loaders = {}
 class_subset_loaders = {}
 
 for class_name, img_list in img_dict.items():
-    dataset = ImgDataset(img_list, resize=224)
+    dataset = ImgDataset(img_list, resize=resize)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
     class_loaders[class_name] = loader
 
@@ -98,11 +73,11 @@ for class_name, img_list in img_dict.items():
     subset_loader = DataLoader(subset, batch_size=batch_size, shuffle=True)   
     class_subset_loaders[class_name] = subset_loader 
 
-'''
+
 subset_indices = torch.randperm(len(dataset))[:subset_size]
 subset = Subset(dataset, subset_indices)
-#print(len(train_subset))
-'''
+
+#uncomment and run the following to get custom normalization parameters (mu, std) tensors for your dataset
 '''
 #INTERACTIVE SESSION TO COMPUTE CUSTOM MEAN AND STD OF THE DATASET, UNCOMMENT WHEN NEEDED
 all_data = ConcatDataset([train_dataset, test_dataset])
