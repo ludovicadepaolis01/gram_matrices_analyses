@@ -4,9 +4,9 @@
 #SBATCH --time=23:55:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=1GB             # memory requested, per cpu
-#SBATCH --account=Sis25_piasini       # account name
-#SBATCH --partition=boost_usr_prod # partition name
+#SBATCH --mem=1GB
+#SBATCH --account=Sis25_piasini
+#SBATCH --partition=boost_usr_prod
 #SBATCH --job-name=par_optim
 #SBATCH --mail-type=ALL
 #SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/par_optim_%x.%A.%a.out
