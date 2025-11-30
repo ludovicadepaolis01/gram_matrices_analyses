@@ -25,6 +25,7 @@ all_files = glob.glob(os.path.join(gram_matrices_path, "*.csv"))
 files_classes  = natsorted([f for f in all_files if "real_classes"   in os.path.basename(f)])
 files_clusters = natsorted([f for f in all_files if "found_clusters" in os.path.basename(f)])
 
+#mask
 pretty_model_names = {
     "alexnet":      "AlexNet",
     "densenet121":  "DenseNet-121",
@@ -42,12 +43,14 @@ pretty_model_names = {
 }
 
 def mi_estimate(
+        classes,
+        clusters,
         output_path,
         plot=True,
         plot_path=".",
         ):
     data = [] 
-    for class_, cluster in zip(files_classes, files_clusters): 
+    for class_, cluster in zip(classes, clusters): 
         df_classes = pd.read_csv(class_) 
         df_clusters = pd.read_csv(cluster) 
         df_joint = pd.DataFrame({"true_classes": df_classes["true_classes"], "cluster_id": df_clusters["cluster_id"] }) 
@@ -65,7 +68,7 @@ def mi_estimate(
         data.append({"model": model, "layer": layer, "mi": mi_bits}) 
             
     df = pd.DataFrame(data, columns=["model", "layer", "mi"]).reset_index(drop=True) 
-    mi_csv = df.to_csv(os.path.join(output_path, f"mi_csv_subset_k47.csv")) 
+    mi_csv = df.to_csv(os.path.join(output_path, f"mi_csv_k47.csv")) 
 
     df_copy = df.copy() 
     df_copy["layer_idx"] = df_copy["layer"].str.extract(r"(\d+)$").astype(int) 
@@ -102,9 +105,9 @@ def mi_estimate(
         plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{info_metric}_k47.png"), bbox_inches="tight")
         plt.close(fig)
     
-    return mi_csv
-
-mi_csv = mi_estimate(
+mi_estimate(
+    classes=files_classes,
+    clusters=files_clusters,
     plot_path=plot_path,
-    out_path=out_path
+    output_path=out_path
 )
