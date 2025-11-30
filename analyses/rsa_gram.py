@@ -228,8 +228,8 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
         im = plt.imshow(similarity_matrix, aspect="auto", vmin=0, vmax=1)
         cbar = plt.colorbar(im, fraction=0.046, pad=0.04)
         cbar.ax.tick_params(labelsize=50)
-        #optionally add axis labels with ticks
         '''
+        #optional: add axis labels with ticks
         plt.xticks([])
         plt.yticks([])
         plt.xticks(np.arange(len(labels)), labels, rotation=90, fontsize=20)
