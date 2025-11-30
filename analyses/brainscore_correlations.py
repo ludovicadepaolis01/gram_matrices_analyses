@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 #input paths
-mi_data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/mi_csv_subset_all_k47.csv"
+mi_data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/mi_csv_k47.csv"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/leaderboard.csv"
 
 #output paths
@@ -83,10 +83,10 @@ def brainscore_corr(
     #clean column names
     df_brainscore.columns = df_brainscore.columns.str.strip()
 
-    # 3) Make everything numeric except 'Model' (and any other obvious text cols)
+    # Make everything numeric except 'Model' (and any other obvious text cols)
     for col in df_brainscore.columns:
         if col.lower() not in {"model"}:
-            #remove any stray non-numeric chars (NBSPs, etc.) before conversion
+            #remove weird characterds
             df_brainscore[col] = pd.to_numeric(
                 df_brainscore[col].astype(str).str.replace(r"[^\d\.\-eE]", "", regex=True),
                 errors="coerce"
@@ -101,12 +101,10 @@ def brainscore_corr(
     wanted_keys = ["average_vision", "neural_vision", "behavior_vision", "v1", "v2", "v4", "it"]
     wanted_cols = [inv_norm[k] for k in wanted_keys if k in inv_norm]
 
-    # Filter the two models (case-insensitive, exact match after strip)
     mask = df_brainscore[model_col].astype(str).str.strip().str.lower().isin([t.lower() for t in targets])
 
     out = df_brainscore.loc[mask, [model_col] + wanted_cols].copy()
 
-    #Nice, consistent column names
     rename_map = {inv_norm[k]: k for k in wanted_keys if k in inv_norm}
     out = out.rename(columns=rename_map)
 
@@ -128,16 +126,18 @@ def brainscore_corr(
     print("\n=== Brainscore models ===")
     print(out_best[model_col].reset_index(drop=True))
 
-
     #columns of brainscore values to correlate against mi 
     brainscore_values = [c for c in combined_df.columns if c in {"average_vision", "neural_vision", "behavior_vision", "v1", "v2", "v4", "it"}]
 
+    '''
+    #optionally add models labels to datapoint
     mi_all = pd.to_numeric(combined_df["mi"], errors="coerce")
     model_all = combined_df["model"].astype(str)
     valid = mi_all.notna()
     tick_pos = mi_all[valid].values
     tick_labels = [f"{x:.3g}\n{m}" for x, m in zip(tick_pos, model_all[valid])]
-
+    '''
+    
     rows = []
 
     n_metrics = len(brainscore_values)
@@ -145,6 +145,7 @@ def brainscore_corr(
     n_rows = int(np.ceil(n_metrics / n_cols))
 
     if plot:
+        #plot one .png with as many subplots as brainscore values
         fig, axes = plt.subplots(
             n_rows, n_cols,
             figsize=(4 * n_cols, 4 * n_rows),
@@ -177,7 +178,6 @@ def brainscore_corr(
 
             r, p = pearsonr(pair["mi"].astype(float), pair[metric].astype(float))
 
-            # scatter...
             for model in all_models:
                 mask = (pair["model"].astype(str) == model)
                 if not mask.any():
@@ -192,11 +192,8 @@ def brainscore_corr(
             ax.set_xlim(0, 3.0)
             ax.set_ylim(0, 0.45)
             ax.tick_params(axis="both", which="major", labelsize=10)
-
-            # Title at the top
             ax.set_title(pretty_metric, fontsize=12, pad=8)
 
-            # ---- AXIS LABELS ONLY ON SELECTED SUBPLOTS ----
             # y-label on "Average Vision" and "V2"
             if pretty_metric in ["Average Vision", "V2"]:
                 ax.set_ylabel("Brainscore", fontsize=14)
@@ -234,14 +231,14 @@ def brainscore_corr(
         fig.legend(
             handles, labels,
             title="Model",
-            loc="center right",          # attach to the left side of the anchor
-            bbox_to_anchor=(0.8, 0.3), # (x,y) in figure coords: right side, middle
+            loc="center right",
+            bbox_to_anchor=(0.8, 0.3),
             borderaxespad=0.,
             fontsize=10,
             title_fontsize=11,
         )
 
-        # leave room on the right for the legend (xmax < 1)
+        # leave room on the right for the legend
         plt.tight_layout(rect=[0.06, 0.06, 0.85, 0.95])
         out_png = os.path.join(plot_path, "correlation_mi_all_brainscores_k47.png")
         plt.savefig(out_png)
