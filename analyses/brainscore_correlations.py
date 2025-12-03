@@ -128,10 +128,12 @@ def brainscore_corr(
 
     print("\n=== Brainscore models ===")
     print(out_best[model_col].reset_index(drop=True))
+    '''
 
     #columns of brainscore values to correlate against mi 
     brainscore_values = [c for c in combined_df.columns if c in {"average_vision", "neural_vision", "behavior_vision", "v1", "v2", "v4", "it"}]
-
+    
+    '''
     #optionally add models labels to datapoint
     mi_all = pd.to_numeric(combined_df["mi"], errors="coerce")
     model_all = combined_df["model"].astype(str)
