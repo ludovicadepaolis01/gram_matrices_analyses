@@ -46,17 +46,14 @@ pretty_model_names = {
     "vgg19":        "VGG-19",
 }
 
-def clean_model(name):
-    return "".join(c for c in name.lower() if c.isalnum())
-
 def mi_estimate(
         classes,
         clusters,
         output_path,
         plot=True,
         plot_path=".",
-        clean_model_function=clean_model,
         ):
+    
     data = [] 
     for class_, cluster in zip(classes, clusters): 
         df_classes = pd.read_csv(class_) 
@@ -90,8 +87,7 @@ def mi_estimate(
                             constrained_layout=True)
 
         # sort models exactly how you want
-        models = sorted(df_copy["model"].unique(), key=clean_model_function)
-        print(models)
+        models = df_copy["model"].unique()
         cmap = mpl.colormaps.get_cmap("tab20")
         colors = cmap(np.linspace(0, 1, len(models)))
 

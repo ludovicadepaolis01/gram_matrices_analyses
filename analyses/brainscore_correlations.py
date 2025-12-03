@@ -1,12 +1,12 @@
 import os
-import numpy as np
+import numpy as np 
 import pandas as pd
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+import matplotlib as mpl
 
 #input paths
-mi_data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/mi_csv_k47.csv"
+mi_data_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_debug/mi_csv_k47.csv"
 brainscore_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/leaderboard.csv"
 
 #output paths
@@ -35,14 +35,14 @@ targets = ["alexnet",
            "densenet-169", 
            "densenet-201", 
            "inception_v3", 
+           "mobilenet_v2_1-4_224_pytorch",
            "resnet_101_v1", 
            "resnet_152_v1", 
            "resnet-18",
            "resnet-34", 
            "resnet_50_v1", 
-           "mobilenet_v2_1-4_224_pytorch",
            "vgg_16", 
-           "vgg_19"]
+           "vgg_19",]
 
 pretty_metric_names = {
     "average_vision":  "Average Vision",
@@ -113,6 +113,7 @@ def brainscore_corr(
     scores = out_best.set_index(model_col).to_dict(orient="index")
     out_best.to_csv(os.path.join(scores_path, "best_brainscores.csv"), index=False)
 
+
     #calculate pearsons r among MI values and the selected brainscores values
     combined_df = pd.concat(
         [top_mi.drop(columns=["layer"]).reset_index(drop=True),
@@ -120,6 +121,8 @@ def brainscore_corr(
         axis=1
     )
 
+    '''
+    #optionally check if the models are aligned!
     print("=== MI top models ===")
     print(top_mi["model"].reset_index(drop=True))
 
@@ -129,7 +132,6 @@ def brainscore_corr(
     #columns of brainscore values to correlate against mi 
     brainscore_values = [c for c in combined_df.columns if c in {"average_vision", "neural_vision", "behavior_vision", "v1", "v2", "v4", "it"}]
 
-    '''
     #optionally add models labels to datapoint
     mi_all = pd.to_numeric(combined_df["mi"], errors="coerce")
     model_all = combined_df["model"].astype(str)
@@ -149,14 +151,15 @@ def brainscore_corr(
         fig, axes = plt.subplots(
             n_rows, n_cols,
             figsize=(4 * n_cols, 4 * n_rows),
-            constrained_layout=True,
         )
+
         axes = np.atleast_1d(axes).reshape(n_rows, n_cols)
 
         # shared models + colors
         all_models = sorted(combined_df["model"].astype(str).unique())
-        cmap = cm.get_cmap("tab20", len(all_models))
-        model_to_color = {m: cmap(i) for i, m in enumerate(all_models)}
+        cmap = mpl.colormaps.get_cmap("tab20")
+        n = max(1, len(all_models) - 1)
+        model_to_color =  {m: cmap(i / n) for i, m in enumerate(all_models)}
 
         for i_metric, metric in enumerate(brainscore_values):
             pretty_metric = pretty_metric_names.get(metric, metric)
