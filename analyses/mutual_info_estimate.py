@@ -5,17 +5,21 @@ import glob
 import pandas as pd
 import regex as re
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from natsort import natsorted
-import matplotlib.cm as cm
-import matplotlib.colors as mcolors
+
 
 #input paths
-gram_matrices_path = "/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/csvs_k47"
+#gram_matrices_path = "/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/csvs_k47"
+gram_matrices_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_k47"
 brainscore_table_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/leaderboard.csv"
 
 #output paths
-out_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs"
+out_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_debug"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
+
+for d in [out_path, plot_path]:
+    os.makedirs(d, exist_ok=True)
 
 #params
 info_metric = "bits"
@@ -42,12 +46,16 @@ pretty_model_names = {
     "vgg19":        "VGG-19",
 }
 
+def clean_model(name):
+    return "".join(c for c in name.lower() if c.isalnum())
+
 def mi_estimate(
         classes,
         clusters,
         output_path,
         plot=True,
         plot_path=".",
+        clean_model_function=clean_model,
         ):
     data = [] 
     for class_, cluster in zip(classes, clusters): 
@@ -79,13 +87,21 @@ def mi_estimate(
     if plot:
         # 3) Plot: one line per model, x = 1..5, y = MI
         fig, ax = plt.subplots(figsize=(15, 10),
-                            constrained_layout=True,)
+                            constrained_layout=True)
 
-        models = sorted(df_copy["model"].unique())
-        colors = cm.get_cmap("tab20", len(models)) 
+        # sort models exactly how you want
+        models = sorted(df_copy["model"].unique(), key=clean_model_function)
+        print(models)
+        cmap = mpl.colormaps.get_cmap("tab20")
+        colors = cmap(np.linspace(0, 1, len(models)))
 
-        for idx, (model, group) in enumerate(df_copy.groupby("model")):
-            ax.plot(group["pos"], group["mi"], marker="o", label=pretty_model_names.get(model, model), color=colors(idx))
+        for idx, model in enumerate(models):
+            group = df_copy[df_copy["model"] == model]
+            ax.plot(group["pos"], 
+                    group["mi"], 
+                    marker="o", 
+                    label=pretty_model_names.get(model, model), 
+                    color=colors[idx])
             '''
             #optional: annotate each point with the true layer index
             for x, y, i in zip(group["pos"], group["mi"], group["layer_idx"]):
@@ -101,7 +117,6 @@ def mi_estimate(
         ax.grid(True, alpha=0.3)
         leg = ax.legend(title="Model", loc="best", fontsize=11)
         leg.get_title().set_fontsize(11) #title font size
-        plt.tight_layout()
         plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{info_metric}_k47.png"), bbox_inches="tight")
         plt.close(fig)
     
