@@ -83,7 +83,7 @@ def mi_estimate(
 
     if plot:
         # 3) Plot: one line per model, x = 1..5, y = MI
-        fig, ax = plt.subplots(figsize=(15, 10),
+        fig, ax = plt.subplots(figsize=(11, 7),
                             constrained_layout=True)
 
         # sort models exactly how you want
@@ -96,6 +96,9 @@ def mi_estimate(
             ax.plot(group["pos"], 
                     group["mi"], 
                     marker="o", 
+                    linewidth=2.5,
+                    markersize=8,
+                    markeredgewidth=1.5,
                     label=pretty_model_names.get(model, model), 
                     color=colors[idx])
             '''
@@ -105,14 +108,19 @@ def mi_estimate(
                             ha="center", fontsize=9)
             '''
 
-        ax.set_xlabel("Layer indices (1-5)", fontsize=15)
-        ax.set_ylabel(f"MI ({info_metric})", fontsize=15)
+        ax.set_xlabel("Layer indices (1-5)", fontsize=20)
+        ax.set_ylabel(f"MI ({info_metric})", fontsize=20)
         ax.set_xticks([1, 2, 3, 4, 5])
-        ax.set_xlim(0.5, 5.5)
-        ax.tick_params(axis='both', which='major', labelsize=15)
+        ax.set_xlim(0.9, 5.1)
+        ax.tick_params(axis='both', which='major', labelsize=20)
         ax.grid(True, alpha=0.3)
-        leg = ax.legend(title="Model", loc="best", fontsize=11)
-        leg.get_title().set_fontsize(11) #title font size
+        leg = ax.legend(
+            title="Model", 
+            loc="best", 
+            fontsize=17,
+            bbox_to_anchor=(1.01, 0.93), 
+            )
+        leg.get_title().set_fontsize(20) #title font size
         plt.savefig(os.path.join(plot_path, f"mi_per_model_data_{info_metric}_k47.png"), bbox_inches="tight")
         plt.close(fig)
     

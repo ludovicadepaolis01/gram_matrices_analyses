@@ -196,16 +196,16 @@ def brainscore_corr(
 
             ax.set_xlim(0, 3.0)
             ax.set_ylim(0, 0.45)
-            ax.tick_params(axis="both", which="major", labelsize=10)
-            ax.set_title(pretty_metric, fontsize=12, pad=8)
+            ax.tick_params(axis="both", which="major", labelsize=15)
+            ax.set_title(pretty_metric, fontsize=15, pad=8)
 
             # y-label on "Average Vision" and "V2"
             if pretty_metric in ["Average Vision", "V2"]:
-                ax.set_ylabel("Brainscore", fontsize=14)
+                ax.set_ylabel("Brainscore", fontsize=15)
 
             # x-label on "V2", "V4", and "IT"
             if pretty_metric in ["V2", "V4", "IT"]:
-                ax.set_xlabel("MI value (bits)", fontsize=14)
+                ax.set_xlabel("MI value (bits)", fontsize=15)
 
             # correlation box
             textstr = f"Pearson r = {r:.3f}\np-value = {p:.2e}\nN = {n_values}"
@@ -237,10 +237,9 @@ def brainscore_corr(
             handles, labels,
             title="Model",
             loc="center right",
-            bbox_to_anchor=(0.8, 0.3),
-            borderaxespad=0.,
-            fontsize=10,
-            title_fontsize=11,
+            bbox_to_anchor=(0.8, 0.28),
+            fontsize=12,
+            title_fontsize=15,
         )
 
         # leave room on the right for the legend
