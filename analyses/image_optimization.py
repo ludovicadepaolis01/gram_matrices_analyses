@@ -23,7 +23,6 @@ from models import (
     alexnet_representations, 
     resnet18_representations, 
     resnet34_representations, 
-    resnet18_representations, 
     resnet50_representations,
     resnet101_representations,
     resnet152_representations,
@@ -61,14 +60,16 @@ model = model_dict[args.model]()
 
 MSE = torch.nn.MSELoss()
 device = "cuda"
-optim_steps = 30000
-mode = "orig"
+optim_steps = 30000 #1 if in orig mode; 30000 if in reco mode
+mode = "reco"
 subset = ""
 
+#output paths
 reco_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/reco_images_{model_name}"
 orig_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/orig_images_{model_name}"
 info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots/{mode}/info_plot_{model_name}"
 gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/gram_matrices/{mode}_gram_{model_name}_data{subset}.h5"
+
 
 for d in [reco_path, orig_path, info_plot_path]:
     os.makedirs(d, exist_ok=True)
