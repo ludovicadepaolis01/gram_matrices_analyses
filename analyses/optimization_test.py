@@ -67,24 +67,26 @@ model = model_dict[args.model]()
 
 MSE = torch.nn.MSELoss()
 device = "cuda"
-optim_steps = 200000 #1 if in orig mode; 30000 if in reco mode
+optim_steps = 160000 #1 if in orig mode; 30000 if in reco mode
 mode = "reco"
 subset = ""
 
-#reconstruct the pebble
-reco_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/pebble"
-orig_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/pebble"
+#reconstruct the texture
+
+text = "blotchy"
+reco_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/{text}_reco/{text}_{model_name}"
+orig_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/{text}"
 
 for d in [reco_path, orig_path]:
     os.makedirs(d, exist_ok=True)
 
 batch_size = 1
 
-img_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/pebble"
+img_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/{text}"
 img_dir = os.listdir(img_path)
 img_list = []
 for f in img_dir:
-    img_list.append(Image.open(os.path.join(img_path, f)))  # already RGB jpg as you said
+    img_list.append(Image.open(os.path.join(img_path, f))) 
 
 #params for image transformations
 resize = 224
@@ -188,10 +190,9 @@ for orig_image, reco_image in zip(loader, gaussian_loader):
         if step % 1000 == 0:
             print(f"step: {step}, gram loss: {sum_gram_matrix_loss.item()}")
 
-    # save with distinct names (otherwise you overwrite)
     with torch.no_grad():
         denorm_reco = denormalize(reco_image, mean, std).clamp(0, 1)
-    u.save_image(denorm_reco, os.path.join(reco_path, f"pebble_reco_s{step}.png"))
+    u.save_image(denorm_reco, os.path.join(reco_path, f"{text}_reco_s{step}.png"))
 
 torch.cuda.empty_cache()
 gc.collect()
