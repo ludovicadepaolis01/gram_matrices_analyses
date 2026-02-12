@@ -2,5 +2,6 @@ This is the code for "Perceptual misalignment of texture representations in conv
 
 - Requirements: Versions of softwares
 - Data
+- models
 - Analyses
 - Jobs
