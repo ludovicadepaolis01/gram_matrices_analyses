@@ -1,9 +1,9 @@
 This is the code for "Perceptual misalignment of texture representations in convolutional neural networks" by de Paolis et al.
 
-- **Requirements**
-  torch = 2.2.0a0+git6c8c5ad
-  torchvision = 0.17.0+b2383d4
-  numpy = 1.26.4
+- **Requirements** \n
+  torch = 2.2.0a0+git6c8c5ad \n
+  torchvision = 0.17.0+b2383d4 \n
+  numpy = 1.26.4 
   scipy = 1.12.0
   pandas = 2.2.1
   matplotlib = 3.8.3
