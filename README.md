@@ -34,11 +34,11 @@ This is the code for "Perceptual misalignment of texture representations in conv
   VGG16 = vgg16_bn-6c64b313.pth
   VGG19 = vgg19_bn-c79401a0.pth
 - **Image optimization and feature extraction**
-  Synthesize one texture sample from the images in `/data` by running `/jobs/par_optim_test.py`.
+  Synthesize one texture sample from the images in `/data` by running `/jobs/par_optim_test.py`.  
   Synthesize one texture sample from each image in DTD by running `jobs/par_optim.sh` as `sbatch par_optim.sh reco`. Extract features from DTD images with one forward pass running `sbatch par_optim.sh orig`.
 - **Analyses**
-  Find the pipeline of our analyses in `/analyses`. The following scripts work on the feature extracted as per in the previous point.
-  `/analyses/rsa_gram.py` performs Representational Similarity Analysis: run with `/jobs/sbatch par_rsa.sh`.
-  `/analyses/mutual_info_estimate.py` computes Mutual Information. run with `/jobs/sbatch mutual_info_estimate.sh`.
-  `/analyses/brainscore_correlations.py` performs correlation against **[BrainScore]([https://arxiv.org/abs/1311.3618](https://arxiv.org/abs/1909.06161))**: run with `jobs/sbatch brainscore_corr.sh`
+  Find the pipeline of our analyses in `/analyses`. The following scripts work on the feature extracted as per in the previous point.  
+  `/analyses/rsa_gram.py` performs Representational Similarity Analysis: run with `/jobs/sbatch par_rsa.sh`.  
+  `/analyses/mutual_info_estimate.py` computes Mutual Information. run with `/jobs/sbatch mutual_info_estimate.sh`.  
+  `/analyses/brainscore_correlations.py` performs correlation against **[BrainScore]([https://arxiv.org/abs/1311.3618](https://arxiv.org/abs/1909.06161))**: run with `jobs/sbatch brainscore_corr.sh`  
   Notes: `/analyses/dataloader_dtd.py` and `/analyses/dataloader_gaussian.py` contain two dataloaders as standard pipeline to deal with data in PyTorch and Torchvision.
