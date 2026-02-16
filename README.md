@@ -23,7 +23,7 @@ This is the code for "Perceptual misalignment of texture representations in conv
   Alexnet = alexnet-owt-7be5be79.pth
   Densenet-121 = densenet121-a639ec97.pth
   Densenet-169 = densenet169-b2777c0a.pth
-  Densenet-201 = densenet201-c1103571.pth
+  Densenet-201 = densenet201-c 1103571.pth
   Inception-v3 = inception_v3_google-1a9a5a14.pth
   Mobilenet = mobilenet_v2-b0353104.pth
   Resnet18 = resnet18-5c106cde.pth
@@ -42,5 +42,5 @@ This is the code for "Perceptual misalignment of texture representations in conv
   Find the pipeline of our analyses in `/analyses`. The following scripts work on the features extracted as per the previous point.  
   `/analyses/rsa_gram.py` performs Representational Similarity Analysis: run with `/jobs/sbatch par_rsa.sh`.  
   `/analyses/mutual_info_estimate.py` computes Mutual Information: run with `/jobs/sbatch mutual_info_estimate.sh`.  
-  `/analyses/brainscore_correlations.py` performs correlation against **[BrainScore](https://arxiv.org/abs/1909.06161)**: run with `jobs/sbatch brainscore_corr.sh`.  
+  `/analyses/brainscore_correlations.py` performs correlation against **[BrainScore (Schrimpf et al., 2019)](https://arxiv.org/abs/1909.06161)**: run with `jobs/sbatch brainscore_corr.sh`.  
   Notes: `/analyses/dataloader_dtd.py` and `/analyses/dataloader_gaussian.py` contain two dataloaders as a standard pipeline to deal with data in PyTorch and Torchvision.  
