@@ -19,7 +19,22 @@ This is the code for "Perceptual misalignment of texture representations in conv
   _Describable Textures Dataset_ in **[Describing Textures in the Wild (Cimpoi et al., 2014)](https://arxiv.org/abs/1311.3618)**.  
   In `/data` you can find the texture images reported in the paper (`blotchy.jpg`, `matted.png`, `scaly.png`, `striped.png`) and the image `pebbles.jpg` from **[Texture synthesis using convolutional neural networks (Gatys et al., 2015)](https://arxiv.org/abs/1505.07376)**.
 
-- models
-- Analyses
-- Image optimization
-- Jobs
+- **Models**
+    ```text
+  Alexnet = alexnet-owt-7be5be79.pth
+  Densenet-121 = densenet121-a639ec97.pth
+  Densenet-169 = densenet169-b2777c0a.pth
+  Densenet-201 = densenet201-c1103571.pth
+  Inception-v3 = inception_v3_google-1a9a5a14.pth
+  Mobilenet = mobilenet_v2-b0353104.pth
+  Resnet18 = resnet18-5c106cde.pth
+  Resnet34 = resnet34-333f7ec4.pth
+  Resnet50 = resnet50-19c8e357.pth
+  Resnet101 = resnet101-5d3b4d8f.pth
+  Resnet152 = resnet152-b121ed2d.pth
+  VGG16 = vgg16_bn-6c64b313.pth
+  VGG19 = vgg19_bn-c79401a0.pth
+    
+- **Analyses**
+- **Image optimization**
+- **Jobs**
