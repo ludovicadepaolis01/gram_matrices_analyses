@@ -34,6 +34,6 @@ This is the code for "Perceptual misalignment of texture representations in conv
   VGG16 = vgg16_bn-6c64b313.pth
   VGG19 = vgg19_bn-c79401a0.pth
 - **Analyses**
-  
+  Find the pipeline of our analyses in `/analyses`.  
 - **Image optimization**
-  You can run 
+  Synthesize one texture sample from the images in `/data` by running `/jobs/par_optim_test.py`. Synthesize textures one texture sample from each image in **Describable Texutures Dataset** by running `jobs/par_optim.sh`.
