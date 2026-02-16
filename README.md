@@ -15,7 +15,7 @@ This is the code for "Perceptual misalignment of texture representations in conv
   ndd = 1.10.6
   scikit-learn = 1.4.1.post1
 - **Data**  
-  _Describable Textures Dataset_ in **[Describing Textures in the Wild (Cimpoi et al., 2014)](https://arxiv.org/abs/1311.3618)**.  
+  _Describable Textures Dataset_ in **[Describing Textures in the Wild (Cimpoi et al., 2014)](https://arxiv.org/abs/1311.3618)** -- **DTD** from now on.  
   In `/data` you can find the texture images reported in the paper (`blotchy.jpg`, `matted.png`, `scaly.png`, `striped.png`) and the image `pebbles.jpg` from **[Texture synthesis using convolutional neural networks (Gatys et al., 2015)](https://arxiv.org/abs/1505.07376)**.
 - **Models**
   All models are available on Torchvision:
@@ -33,7 +33,12 @@ This is the code for "Perceptual misalignment of texture representations in conv
   Resnet152 = resnet152-b121ed2d.pth
   VGG16 = vgg16_bn-6c64b313.pth
   VGG19 = vgg19_bn-c79401a0.pth
+- **Image optimization and feature extraction**
+  Synthesize one texture sample from the images in `/data` by running `/jobs/par_optim_test.py`.
+  Synthesize one texture sample from each image in DTD by running `jobs/par_optim.sh` as `sbatch par_optim.sh reco`. Extract features from DTD images with one forward pass running `sbatch par_optim.sh orig`.
 - **Analyses**
-  Find the pipeline of our analyses in `/analyses`.  
-- **Image optimization**
-  Synthesize one texture sample from the images in `/data` by running `/jobs/par_optim_test.py`. Synthesize textures one texture sample from each image in **Describable Texutures Dataset** by running `jobs/par_optim.sh`.
+  Find the pipeline of our analyses in `/analyses`. The following scripts work on the feature extracted as per in the previous point.
+  `/analyses/rsa_gram.py` performs Representational Similarity Analysis: run with `/jobs/sbatch par_rsa.sh`.
+  `/analyses/mutual_info_estimate.py` computes Mutual Information. run with `/jobs/sbatch mutual_info_estimate.sh`.
+  `/analyses/brainscore_correlations.py` performs correlation against **[BrainScore]([https://arxiv.org/abs/1311.3618](https://arxiv.org/abs/1909.06161))**: run with `jobs/sbatch brainscore_corr.sh`
+  Notes: `/analyses/dataloader_dtd.py` and `/analyses/dataloader_gaussian.py` contain two dataloaders as standard pipeline to deal with data in PyTorch and Torchvision.
