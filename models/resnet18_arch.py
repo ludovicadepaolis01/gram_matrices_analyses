@@ -11,8 +11,8 @@ import os
 
 OMP_NUM_THREADS=1
 
-#resnet18_pretrained = models.resnet18()
-#print(resnet18_pretrained)
+resnet18_pretrained = models.resnet18()
+print(resnet18_pretrained)
 
 #alexnet
 class resnet18_representations(nn.Module):

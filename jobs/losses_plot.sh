@@ -9,8 +9,8 @@
 #SBATCH --partition=boost_usr_prod # partition name
 #SBATCH --job-name=par_optim
 #SBATCH --mail-type=ALL
-#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_out/losses_plots_%x.%A.%3a.out
-#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_out/losses_plots_%x.%A.%3a.err
+#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/losses_plots_%x.%A.%3a.out
+#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/losses_plots_%x.%A.%3a.err
 #SBATCH --array=0-15 #total number of models
 
 module purge #unload any previously loaded modules to use a clean venv
@@ -37,8 +37,8 @@ wait_for_job() {
 
 jid_pre=$(sbatch --parsable $BASE_OPTS \
     --job-name="${MODEL_NAME}_optimization" \
-    --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_out/${MODEL_NAME}_loss_%A.out" \
-    --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_out/${MODEL_NAME}_loss_%A.err" \
+    --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_loss_%A.out" \
+    --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_loss_%A.err" \
     --wrap="python -u losses_plots.py --model $MODEL_NAME")
 wait_for_job "$jid_pre"
 
@@ -47,8 +47,8 @@ for i in {1..2}; do
     jid=$(sbatch --parsable $BASE_OPTS \
         --dependency=afterany:$prev_jid \
         --job-name="${MODEL_NAME}_optimization" \
-        --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_out/${MODEL_NAME}_loss_%A.out" \
-        --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_out/${MODEL_NAME}_loss_%A.err" \
+        --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_loss_%A.out" \
+        --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_loss_%A.err" \
         --wrap="python -u losses_plots.py --model $MODEL_NAME")
     wait_for_job "$jid"
     prev_jid=$jid

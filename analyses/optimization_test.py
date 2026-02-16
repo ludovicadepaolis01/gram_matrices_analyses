@@ -56,28 +56,33 @@ model_dict = {
     "densenet201": densenet201_representations,
 }
 
+texture_choices = ["blotchy", "matted", "pebble", "scaly", "striped"]
+
 #parse command-line argument
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, required=True, choices=model_dict.keys(), 
                     help="Which model to run")
+parser.add_argument("--texture", type=str, required=True, choices=texture_choices, 
+                    help="Which texture to generate")
 
 args = parser.parse_args()
 model_name = args.model
+texture_name = args.texture
 model = model_dict[args.model]()
 
 MSE = torch.nn.MSELoss()
 device = "cuda"
-optim_steps = 160000 #1 if in orig mode; 30000 if in reco mode
+optim_steps = 160000 
+#1 if in orig mode; 30000 if in reco mode; 160000 for best generation quality
 mode = "reco"
 subset = ""
 
 #reconstruct the texture
-
-text = "blotchy"
-reco_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/{text}_reco/{text}_{model_name}"
+text = texture_name #reconstruction of the textures displayed in the paper only
+reco_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/{text}_reco/"
 orig_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/{text}"
 
-for d in [reco_path, orig_path]:
+for d in [reco_path, orig_path]: 
     os.makedirs(d, exist_ok=True)
 
 batch_size = 1
@@ -192,7 +197,7 @@ for orig_image, reco_image in zip(loader, gaussian_loader):
 
     with torch.no_grad():
         denorm_reco = denormalize(reco_image, mean, std).clamp(0, 1)
-    u.save_image(denorm_reco, os.path.join(reco_path, f"{text}_reco_s{step}.png"))
+    u.save_image(denorm_reco, os.path.join(reco_path, f"{model_name}_{text}_reco_s{step}.png"))
 
 torch.cuda.empty_cache()
 gc.collect()

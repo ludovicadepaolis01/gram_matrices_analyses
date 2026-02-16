@@ -43,7 +43,7 @@ class VGG19_representations(nn.Module):
 
      def hook_func(self, module, input, output): #all of the three arguments are necessary
           name = module.name
-          print(f"Hook fired for: {name}")
+          #print(f"Hook fired for: {name}")
           #feature_maps = self.feature_maps
           self.feature_maps[name] = output#.detach()
           

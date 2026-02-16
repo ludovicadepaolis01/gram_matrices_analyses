@@ -27,6 +27,7 @@ echo "Running model: $MODEL_NAME"
 
 cd $HOME/lab/gram_matrices_analyses/analyses
 
+
 BASE_OPTS="--partition=boost_usr_prod --account=Sis25_piasini -n 1 -c 8 --mem=32G -t 23:55:00 --gres=gpu:1"
 
 wait_for_job() {

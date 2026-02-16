@@ -12,8 +12,8 @@
 #SBATCH --job-name=correlations
 #SBATCH --mail-type=ALL
 ##SBATCH --mail-user=ldepaoli@sissa.it
-#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/analyses_out/corr_%x.%A.%3a.out
-#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/analyses_out/corr_%x.%A.%3a.err
+#SBATCH --output=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/corr_%x.%A.%3a.out
+#SBATCH --error=/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/corr_%x.%A.%3a.err
 
 module load profile/deeplrn
 module load cineca-ai/4.3.0
