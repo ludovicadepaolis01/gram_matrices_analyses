@@ -49,19 +49,24 @@ model_dict = {
     "densenet201": densenet201_representations,
 }
 
+mode_choice = ["reco", "orig"]
+
 #parse command-line argument
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, required=True, choices=model_dict.keys(), 
                     help="Which model to run")
+parser.add_argument("--mode", type=str, required=True, choices=mode_choice, 
+                    help="reco or orig mode selection")
 
 args = parser.parse_args()
 model_name = args.model
+mode_name = args.mode
 model = model_dict[args.model]()
 
 MSE = torch.nn.MSELoss()
 device = "cuda"
 optim_steps = 30000 #1 if in orig mode; 30000 if in reco mode
-mode = "reco"
+mode = mode_name
 subset = ""
 
 #output paths
