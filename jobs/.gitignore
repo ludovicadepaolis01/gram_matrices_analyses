@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.~lock*
+.fuse_hidden*
+out/
+csvs/
+csvs_debug/
+csvs_k47/
+info_plots/
+pebble/
+job_ids_*.txt
+best_brainscores.csv
