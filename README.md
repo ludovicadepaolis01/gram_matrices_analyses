@@ -15,7 +15,6 @@ This is the code for "Perceptual misalignment of texture representations in conv
   ndd = 1.10.6
   scikit-learn = 1.4.1.post1
 
-
 - **Data**
   _Describable Textures Dataset_ in **Describing Textures in the Wild (Cimpoi et al., 2014)**
   In /data the images of textures reported in the paper (_blotchy.jpg, matted.png, scaly.png, striped.png_) and the image (pebbles.jpg) present in **Texture synthesis using convolutional neural networks** by Gatys et al., 2025.
