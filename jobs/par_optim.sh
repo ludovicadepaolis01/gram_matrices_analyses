@@ -22,8 +22,11 @@ job_id_file="job_ids_optim.txt"
 > "$job_id_file" #clear the job_ids.txt file at the start
 
 MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet152 inceptionv3 mobilenet densenet121 densenet169 densenet201)
+MODE=(reco orig)
 MODEL_NAME="${MODELS[$SLURM_ARRAY_TASK_ID]}"
-echo "Running model: $MODEL_NAME"
+MODE_NAME="${1:?Usage: sbatch par_optim.sh <reco|orig>}"
+
+echo "Running model: $MODEL_NAME in $MODE_NAME mode"
 
 cd $HOME/lab/gram_matrices_analyses/analyses
 
@@ -40,7 +43,7 @@ jid_pre=$(sbatch --parsable $BASE_OPTS \
     --job-name="${MODEL_NAME}_optimization" \
     --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_gen_%A.out" \
     --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_err_%A.err" \
-    --wrap="python -u image_optimization.py --model $MODEL_NAME")
+    --wrap="python -u image_optimization.py --model $MODEL_NAME --mode $MODE_NAME")
 wait_for_job "$jid_pre"
 
 prev_jid=$jid_pre
@@ -50,7 +53,7 @@ for i in {1..2}; do
         --job-name="${MODEL_NAME}_optimization" \
         --output="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_gen_%A.out" \
         --error="/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/out/${MODEL_NAME}_optim_err_%A.err" \
-        --wrap="python -u image_optimization.py --model $MODEL_NAME")
+        --wrap="python -u image_optimization.py --model $MODEL_NAME --mode $MODE_NAME")
     wait_for_job "$jid"
     prev_jid=$jid
 done
