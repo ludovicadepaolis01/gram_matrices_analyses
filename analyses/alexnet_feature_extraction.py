@@ -8,6 +8,9 @@ from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader, Subset, ConcatDataset
 from torchvision.transforms import Compose
 from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import numpy as np
 
 #params
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -17,6 +20,15 @@ dtd_path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/clip_textures/data/dtd
 dtd_dir = os.listdir(dtd_path)
 dtd_basename = os.path.basename(os.path.dirname(dtd_path))
 print(dtd_basename)
+
+model_features_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/features/{model_name}/{basename}"
+if not os.path.exists(model_features_path):
+    os.makedirs(model_features_path, exist_ok=True)
+
+plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
+if not os.path.exists(plot_path):
+        os.makedirs(plot_path, exist_ok=True)
+
 
 img_paths = []
 for cls in sorted(os.listdir(dtd_path)):
@@ -66,7 +78,7 @@ class ImgDataset(Dataset):
         return x  # single tensor
     
 dataset = ImgDataset(img_paths, resize=resize)
-loader = DataLoader(dataset, batch_size, shuffle=False, num_workers=2)
+loader = DataLoader(dataset, batch_size, shuffle=False, num_workers=1)
 
 num_images = 1
 image_size = (3, 224, 224)
@@ -91,35 +103,64 @@ def alexnet_features_extraction(data_path=dtd_path,
                                 selected_idx=idx,
                                 loader=loader,
                                 alexnet_model=alexnet_representations,
+                                model_features_path=model_features_path,
+                                plot=True,
+                                plot_path=plot_path,
                                 ):
     
     model = alexnet_model(selected_idx).to(device)
     model.eval()
 
-    model_features_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/features/{model_name}/{basename}"
-    if not os.path.exists(model_features_path):
-        os.makedirs(model_features_path, exist_ok=True)
-
     image_loader = loader
 
     chunks = []
+    vecs = []
+    sum_vec = None
     with torch.no_grad():
         for images in image_loader:
             images = images.to(device, non_blocking=True)
-            _, _, _, _, features = model(images)
-            features = features.to(torch.float16).cpu()
-            print(features.shape)
-            chunks.append(features)
+            _, _, _, _, feature = model(images)
+            feature = feature.to(torch.float16).cpu()
+            print(feature.shape)
+            chunks.append(feature)
+            print(f"batch {feature.shape}")
 
-            print(f"batch {features.shape}")
-            del images, features
+            del images, feature
 
     full_features = torch.cat(chunks, dim=0)
     torch.save(full_features, os.path.join(model_features_path, f"{model_name}_features_{basename}_layer_{selected_idx}.pt"))
     print(f"{model_name} image features extracted:", full_features.shape)
 
-
 alexnet_features_extraction()
 
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
+
+mean_vecs = []
+for i, l in enumerate(sorted(layer_indices)):
+    fname = f"{model_name}_features_dtd_layer_{l}.pt"
+    features_path = os.path.join(model_features_path, fname)
+    
+    feature = torch.load(features_path, map_location="cpu")
+    print(feature.shape)  
+
+    vec = feature.float().mean(dim=(0, 2, 3))
+
+    mean_vec = torch.stack(vec, dim=0).mean(dim=0).numpy()
+    mean_vecs.append(mean_vec)
+
+rows, cols = 2, 3
+fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 4 * rows))
+axes = axes.flatten()
+    
+for i, (l, v) in enumerate(zip(layer_indices, mean_vecs)):
+    axes[i].plot(v.numpy(), alpha=0.8)
+    axes[i].set_title(f"{model_name} dtd layer {l}")
+    axes[i].set_xlabel("channel index")
+    axes[i].set_ylabel("mean value")
+
+out = os.path.join(plot_path, f"{model_name}_dtd_feaures.png")
+plt.tight_layout()
+plt.savefig(out, dpi=150)
+plt.close()
+print("alexnet feature plot done")  
