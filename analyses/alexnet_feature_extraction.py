@@ -15,13 +15,29 @@ import numpy as np
 #params
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from models import alexnet_representations
+model_name="alexnet"
+print("loaded alexnet")
+
+layer_indices = [0, 3, 6, 8, 10]
+print(layer_indices)
+
+#params for image transformations
+resize = 224
+image_index = 0
+batch_size = 8
+subset_size = 10
+
 #input paths
 dtd_path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/clip_textures/data/dtd/images"
 dtd_dir = os.listdir(dtd_path)
 dtd_basename = os.path.basename(os.path.dirname(dtd_path))
 print(dtd_basename)
 
-model_features_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/features/{model_name}/{basename}"
+model_features_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/features/{model_name}/dtd"
 if not os.path.exists(model_features_path):
     os.makedirs(model_features_path, exist_ok=True)
 
@@ -37,23 +53,6 @@ for cls in sorted(os.listdir(dtd_path)):
         continue
     for fn in sorted(os.listdir(cls_dir)):
         img_paths.append(os.path.join(cls_dir, fn))
-
-#alexnet dir
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-from models import alexnet_representations
-model_name="alexnet"
-print("loaded alexnet")
-
-layer_indices = [0, 3, 6, 8, 10]
-
-print(layer_indices)
-
-#params for image transformations
-resize = 224
-image_index = 0
-batch_size = 8
-subset_size = 10
 
 class ImgDataset(Dataset):
     def __init__(self, img_list, resize=resize):
@@ -99,7 +98,7 @@ if torch.cuda.is_available():
 
 def alexnet_features_extraction(data_path=dtd_path,
                                 basename=dtd_basename,
-                                model_name="alexnet",
+                                model_name=model_name,
                                 selected_idx=idx,
                                 loader=loader,
                                 alexnet_model=alexnet_representations,
@@ -135,32 +134,3 @@ alexnet_features_extraction()
 
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
-
-mean_vecs = []
-for i, l in enumerate(sorted(layer_indices)):
-    fname = f"{model_name}_features_dtd_layer_{l}.pt"
-    features_path = os.path.join(model_features_path, fname)
-    
-    feature = torch.load(features_path, map_location="cpu")
-    print(feature.shape)  
-
-    vec = feature.float().mean(dim=(0, 2, 3))
-
-    mean_vec = torch.stack(vec, dim=0).mean(dim=0).numpy()
-    mean_vecs.append(mean_vec)
-
-rows, cols = 2, 3
-fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 4 * rows))
-axes = axes.flatten()
-    
-for i, (l, v) in enumerate(zip(layer_indices, mean_vecs)):
-    axes[i].plot(v.numpy(), alpha=0.8)
-    axes[i].set_title(f"{model_name} dtd layer {l}")
-    axes[i].set_xlabel("channel index")
-    axes[i].set_ylabel("mean value")
-
-out = os.path.join(plot_path, f"{model_name}_dtd_feaures.png")
-plt.tight_layout()
-plt.savefig(out, dpi=150)
-plt.close()
-print("alexnet feature plot done")  
