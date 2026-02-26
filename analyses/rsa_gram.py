@@ -6,7 +6,8 @@ from scipy.spatial.distance import squareform
 from scipy.cluster import hierarchy
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+from scipy.cluster.hierarchy import dendrogram
 import ndd
 import pandas as pd
 import argparse
@@ -63,7 +64,7 @@ path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/gra
 file  = os.path.join(path, f"orig_gram_{model_name}_data.h5")
 
 #output paths
-rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms_debug"
+rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 csv_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_k47"
 
@@ -72,6 +73,39 @@ for d in [rdms_path, plot_path, csv_path]:
 
 checkpoint_dir = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/analyses_checkpoints/analyses_ckpts_{model_name}_k47"
 Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram
+
+def plot_dendrogram(model, *, truncate_mode=None, p=30, ax=None, **dendro_kwargs):
+    if ax is None:
+        ax = plt.gca()
+
+    children = model.children_
+    n_samples = model.n_leaves_
+
+    counts = np.zeros(children.shape[0])
+    for i, (left, right) in enumerate(children):
+        c = 0
+        c += 1 if left  < n_samples else counts[left  - n_samples]
+        c += 1 if right < n_samples else counts[right - n_samples]
+        counts[i] = c
+
+    if not hasattr(model, "distances_"):
+        raise ValueError("Model has no distances_. Fit with compute_distances=True.")
+
+    linkage_matrix = np.column_stack([children, model.distances_, counts]).astype(float)
+
+    dendrogram(
+        linkage_matrix,
+        truncate_mode=truncate_mode,
+        p=p,
+        ax=ax,
+        **dendro_kwargs
+    )
+    return linkage_matrix
 
 #function that runs hierarchical clustering
 #it also plots: 
@@ -113,9 +147,11 @@ def hieararchical_clustering_by_mi(
 
     pca = pca_function(n_components=3)
     gram_vectors_proj = pca.fit_transform(gram_vectors_data)
+
+
     
     for k in ks:
-        model = AgglomerativeClustering(n_clusters=k, linkage='ward')
+        model = AgglomerativeClustering(n_clusters=k, linkage='ward',compute_distances=True)
         found_clusters = model.fit_predict(gram_vectors_data)
         data_for_mi = np.column_stack([true_labels, found_clusters])
         mutual_info = mi_function(data_for_mi)    
@@ -141,6 +177,7 @@ def hieararchical_clustering_by_mi(
     best_k = 47
     best_labels = label_dict[best_k]
 
+    '''
     #plot MI by found cluster
     if plot:
         fname = f"{pretty_model}_{layer_name}_{mode}_k{best_k}_mi.png"
@@ -185,6 +222,39 @@ def hieararchical_clustering_by_mi(
         plt.tight_layout()
         plt.savefig(os.path.join(rdms_path, fname))
         plt.close(fig)
+    '''
+        
+
+    #visualize dendrogram
+    if plot:
+        model_full = AgglomerativeClustering(
+            distance_threshold=0,
+            n_clusters=None,
+            linkage="ward",
+            compute_distances=True
+        ).fit(gram_vectors_data)
+
+        plt.figure(figsize=(9, 9))
+        Z = plot_dendrogram(model_full, no_labels=True)
+        n = Z.shape[0] + 1
+        m = n - best_k
+        if best_k == 1:
+            t = Z[-1, 2] + 1e-12
+        elif best_k == n:
+            t = 0.0
+        else:
+            t = 0.5 * (Z[m-1, 2] + Z[m, 2])
+
+        plt.axhline(t, linestyle="--", linewidth=1)
+        plt.ylim(t, plt.ylim()[1])
+
+        fname = f"{pretty_model}_{layer_name}_dendrogram_k{best_k}.png"
+        plt.xlabel(f"k={best_k} cut")
+        plt.ylabel("Ward distance")
+        plt.title(f"{pretty_model} layer {layer_name} dendrogram")
+        plt.tight_layout()
+        plt.savefig(os.path.join(rdms_path, fname))
+        plt.close()
     
     codes = true_labels
     return codes, best_k, best_labels, mi_dict, found_clusters_
@@ -248,6 +318,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
             pca_function=PCA, 
             layer_name=layer, 
             mode=mode,
+            plot=True,
             plot_path=plot_path,
             checkpoint_dir=checkpoint_dir
         )

@@ -72,7 +72,7 @@ model = model_dict[args.model]()
 
 MSE = torch.nn.MSELoss()
 device = "cuda"
-optim_steps = 160000 
+optim_steps = 5999 
 #1 if in orig mode; 30000 if in reco mode; 160000 for best generation quality
 mode = "reco"
 subset = ""
@@ -119,7 +119,7 @@ class ImgDataset(Dataset):
             raise ValueError("Expected a PIL.Image object.")
 
 dataset = ImgDataset(img_list, resize=resize)
-loader = DataLoader(dataset, batch_size, shuffle=False, num_workers=2)
+loader = DataLoader(dataset, batch_size, shuffle=False, num_workers=1)
 
 num_images = 1
 image_size = (3, 224, 224)
@@ -142,7 +142,7 @@ class GaussianImageDataset(Dataset):
         return gaussian_img
     
 gaussian_dataset = GaussianImageDataset()
-gaussian_loader = DataLoader(gaussian_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
+gaussian_loader = DataLoader(gaussian_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
 
 model.zero_grad()
 model.eval()
@@ -169,7 +169,6 @@ preprocess = transforms.Compose([
     transforms.Normalize(mean, std),
 ])
 
-
 target_image = next(iter(loader)).to(device)
 with torch.no_grad():
     orig_gram_matrices, feature_map_m_list, _ = model(target_image)
@@ -178,19 +177,30 @@ for orig_image, reco_image in zip(loader, gaussian_loader):
 
     orig_image = orig_image.to(device)
     reco_image = nn.Parameter(reco_image.clone().detach().to(device))
-    optimizer = optim.Adam([reco_image], lr=1e-4)
+    optimizer = optim.LBFGS([reco_image], 
+                            lr=1, 
+                            max_iter=20,
+                            line_search_fn="strong_wolfe",
+                            history_size=400,
+                            tolerance_grad=1e-14,
+                            tolerance_change=1e-16,
+                            )
 
     for step in range(optim_steps):
-        optimizer.zero_grad()
 
-        reco_gram_matrices, _, _ = model(reco_image)
+        def closure():
+            optimizer.zero_grad()
 
-        sum_gram_matrix_loss = 0
-        for orig_g, reco_g, m in zip(orig_gram_matrices, reco_gram_matrices, feature_map_m_list):
-            sum_gram_matrix_loss += MSE(orig_g, reco_g) / (4 * m)
+            reco_gram_matrices, _, _ = model(reco_image)
 
-        sum_gram_matrix_loss.backward()
-        optimizer.step()
+            sum_gram_matrix_loss = 0
+            for orig_g, reco_g, m in zip(orig_gram_matrices, reco_gram_matrices, feature_map_m_list):
+                sum_gram_matrix_loss += MSE(orig_g, reco_g) / (4 * m)
+
+            sum_gram_matrix_loss.backward()
+            return sum_gram_matrix_loss
+        
+        sum_gram_matrix_loss = optimizer.step(closure)
 
         if step % 1000 == 0:
             print(f"step: {step}, gram loss: {sum_gram_matrix_loss.item()}")
