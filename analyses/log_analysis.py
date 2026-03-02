@@ -12,7 +12,6 @@ from scipy.spatial.distance import squareform
 from scipy.cluster import hierarchy
 from scipy.signal import savgol_filter
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.decomposition import PCA
 from kneed import KneeLocator
 import matplotlib.pyplot as plt
 import math
@@ -98,14 +97,12 @@ def hieararchical_clustering_by_mi(
     ckpt_path = os.path.join(checkpoint_dir, f"{model_name}_{layer_name}_log_analysis_ckpt.npz")
 
     mi_dict = {}
-    log_dict = {}
     label_dict = {}
 
     if os.path.exists(ckpt_path):
         data = np.load(ckpt_path, allow_pickle=True)
         done_ks = set(data["ks_done"].tolist())
         mi_dict.update(data["mi_dict"].item())
-        log_dict.update(data["log_dict"].item())
         labels_by_k = data["labels_by_k"].item()
         label_dict.update({int(k): labels_by_k[str(k)] for k in labels_by_k})
         print(f"resume {layer_name}: found done ks: {sorted(done_ks)}")
@@ -120,10 +117,10 @@ def hieararchical_clustering_by_mi(
         found_clusters = model.fit_predict(gram_vectors_data)
         data_for_mi = np.column_stack([true_labels, found_clusters])
         mutual_info = mi_function(data_for_mi)
-        log_info = log_function(real_classes)   
+        mutual_info = mutual_info/np.log(2)
+        log_info = log_function(k)   
         mi_dict[k] = mutual_info
         label_dict[k] = found_clusters
-        log_dict[k] = log_info
 
         ks_done = sorted(set(done_ks) | set(mi_dict.keys())) 
         labels_by_k = {str(kk): label_dict[kk] for kk in label_dict}
@@ -131,7 +128,6 @@ def hieararchical_clustering_by_mi(
             ckpt_path,
             ks_done=np.array(ks_done),
             mi_dict=np.array(mi_dict),
-            log_dict=np.array(log_dict),
             labels_by_k=np.array(labels_by_k)
         )
         print(f"ckpt layer {layer_name}: saved k={k}")
@@ -141,9 +137,8 @@ def hieararchical_clustering_by_mi(
 
     ks = sorted(mi_dict.keys())
     mi_values = [mi_dict[k] for k in ks]
-    log_values = [log_dict[k] for k in ks]
- 
-    best_labels = label_dict[best_k]
+    log2_47 = log_function(real_classes)
+    theory_values = [min(log2_47, log_function(k)) for k in ks]
 
     mi_smooth = savgol_filter(mi_values, window_length=5, polyorder=2)  #tweak window_length
     mi_monotone = np.maximum.accumulate(mi_smooth)  #guards against small dips
@@ -154,19 +149,13 @@ def hieararchical_clustering_by_mi(
     print(f"best k{best_k_mi}")
     print(f"best label{best_labels}")
 
-    log_smooth = savgol_filter(log_values, window_length=5, polyorder=2)
-    log_monotone = np.maximum.accumulate(log_smooth)
-    knee_log = KneeLocator(ks, log_monotone, curve='concave', direction='increasing', S=7.0)
-    best_k_log = knee_log.knee if knee_log.knee is not None else max(log_dict, key=log_dict.get)
-
     if plot:
         fname = f"{model_name}_{layer_name}_{mode}_k{best_k_mi}_mi_log.png"
         #os.makedirs(plot_path, exist_ok=True)
         plt.figure(figsize=(10, 6))
         plt.plot(ks, mi_values, marker='o', linestyle='-')
-        plt.plot(ks, log_values, marker='s', linestyle='-.')
+        plt.plot(ks, theory_values, marker='s', linestyle='-.')
         plt.axvline(best_k_mi, color='red', linestyle='--', label=f'Best k MI = {best_k_mi}')
-        plt.axvline(best_k_log, color='red', linestyle=":", label=fr'Best k $\log_2(47)$ = {best_k_log}')
         plt.xlabel("n. of found clusters")
         plt.ylabel("mutual information")
         plt.title(f"{model_name} layer {layer_name} MI and log per found clusters")
@@ -221,7 +210,7 @@ for layer_vectors, layer_labels in [(vecs_by_layer, labels_by_layer)]:
 
         codes, _ = pd.factorize(np.asanyarray(labels))
 
-        codes, best_k, best_labels, mi_dict, found_clusters_ = hieararchical_clustering_by_mi(
+        codes, best_k_mi, best_labels, mi_dict, found_clusters_ = hieararchical_clustering_by_mi(
             Xn, 
             codes,
             mi_function=ndd.mutual_information, 
