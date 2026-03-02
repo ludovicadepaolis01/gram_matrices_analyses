@@ -25,7 +25,6 @@ model_list = [
     "resnet101",
     "resnet152",
     "inceptionv3",
-    "mobilenet",
     "densenet121",
     "densenet169",
     "densenet201"
@@ -37,7 +36,6 @@ pretty_model_names = {
     "densenet169":  "DenseNet-169",
     "densenet201":  "DenseNet-201",
     "inceptionv3":  "InceptionV3",
-    "mobilenet":    "MobileNetV2",
     "resnet18":     "ResNet18",
     "resnet34":     "ResNet34",
     "resnet50":     "ResNet50",
@@ -148,8 +146,6 @@ def hieararchical_clustering_by_mi(
     pca = pca_function(n_components=3)
     gram_vectors_proj = pca.fit_transform(gram_vectors_data)
 
-
-    
     for k in ks:
         model = AgglomerativeClustering(n_clusters=k, linkage='ward',compute_distances=True)
         found_clusters = model.fit_predict(gram_vectors_data)
@@ -177,7 +173,38 @@ def hieararchical_clustering_by_mi(
     best_k = 47
     best_labels = label_dict[best_k]
 
-    '''
+    #visualize dendrogram
+    if plot:
+        model_full = AgglomerativeClustering(
+            distance_threshold=0,
+            n_clusters=None,
+            linkage="ward",
+            compute_distances=True
+        ).fit(gram_vectors_data)
+
+        plt.figure(figsize=(9, 9))
+        Z = plot_dendrogram(model_full, no_labels=True)
+        n = Z.shape[0] + 1
+        m = n - best_k
+        if best_k == 1:
+            t = Z[-1, 2] + 1e-12
+        elif best_k == n:
+            t = 0.0
+        else:
+            t = 0.5 * (Z[m-1, 2] + Z[m, 2])
+
+        plt.axhline(t, linestyle="--", linewidth=1)
+        plt.ylim(t, plt.ylim()[1])
+
+        fname = f"{pretty_model}_{layer_name}_dendrogram_k{best_k}.png"
+        plt.xlabel(f"k={best_k} cut")
+        plt.ylabel("Ward distance")
+        plt.title(f"{pretty_model} layer {layer_name} dendrogram")
+        plt.tight_layout()
+        print("saving dendrogram to:", os.path.join(rdms_path, fname))
+        plt.savefig(os.path.join(rdms_path, fname))
+        plt.close()
+
     #plot MI by found cluster
     if plot:
         fname = f"{pretty_model}_{layer_name}_{mode}_k{best_k}_mi.png"
@@ -222,40 +249,7 @@ def hieararchical_clustering_by_mi(
         plt.tight_layout()
         plt.savefig(os.path.join(rdms_path, fname))
         plt.close(fig)
-    '''
         
-
-    #visualize dendrogram
-    if plot:
-        model_full = AgglomerativeClustering(
-            distance_threshold=0,
-            n_clusters=None,
-            linkage="ward",
-            compute_distances=True
-        ).fit(gram_vectors_data)
-
-        plt.figure(figsize=(9, 9))
-        Z = plot_dendrogram(model_full, no_labels=True)
-        n = Z.shape[0] + 1
-        m = n - best_k
-        if best_k == 1:
-            t = Z[-1, 2] + 1e-12
-        elif best_k == n:
-            t = 0.0
-        else:
-            t = 0.5 * (Z[m-1, 2] + Z[m, 2])
-
-        plt.axhline(t, linestyle="--", linewidth=1)
-        plt.ylim(t, plt.ylim()[1])
-
-        fname = f"{pretty_model}_{layer_name}_dendrogram_k{best_k}.png"
-        plt.xlabel(f"k={best_k} cut")
-        plt.ylabel("Ward distance")
-        plt.title(f"{pretty_model} layer {layer_name} dendrogram")
-        plt.tight_layout()
-        plt.savefig(os.path.join(rdms_path, fname))
-        plt.close()
-    
     codes = true_labels
     return codes, best_k, best_labels, mi_dict, found_clusters_
 
