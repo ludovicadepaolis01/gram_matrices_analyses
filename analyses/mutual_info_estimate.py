@@ -36,7 +36,6 @@ pretty_model_names = {
     "densenet169":  "DenseNet-169",
     "densenet201":  "DenseNet-201",
     "inceptionv3":  "InceptionV3",
-    "mobilenet":    "MobileNetV2",
     "resnet18":     "ResNet18",
     "resnet34":     "ResNet34",
     "resnet50":     "ResNet50",
