@@ -18,7 +18,7 @@ module load profile/deeplrn
 module load cineca-ai/4.3.0
 source $HOME/virtualenvs/dl/bin/activate
 
-MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet152 inceptionv3 mobilenet densenet121 densenet169 densenet201)
+MODELS=(vgg16 vgg19 alexnet resnet18 resnet34 resnet50 resnet101 resnet152 inceptionv3 densenet121 densenet169 densenet201)
 TEXTURES=(blotchy matted pebble scaly striped)
 
 N_TEXT=${#TEXTURES[@]}
