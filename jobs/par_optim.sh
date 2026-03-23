@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1GB
-#SBATCH --account=Sis25_piasini
+#SBATCH --account=CMPNS_sissapia
 #SBATCH --partition=boost_usr_prod
 #SBATCH --job-name=par_optim
 #SBATCH --mail-type=ALL
@@ -31,7 +31,7 @@ echo "Running model: $MODEL_NAME in $MODE_NAME mode"
 cd $HOME/lab/gram_matrices_analyses/analyses
 
 
-BASE_OPTS="--partition=boost_usr_prod --account=Sis25_piasini -n 1 -c 8 --mem=32G -t 23:55:00 --gres=gpu:1"
+BASE_OPTS="--partition=boost_usr_prod --account=CMPNS_sissapia -n 1 -c 8 --mem=32G -t 23:55:00 --gres=gpu:1"
 
 wait_for_job() {
     local jid=$1

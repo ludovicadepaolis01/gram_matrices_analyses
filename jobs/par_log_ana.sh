@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=16GB
-#SBATCH --account=Sis25_piasini
+#SBATCH --account=CMPNS_sissapia
 #SBATCH --partition=boost_usr_prod # partition name
 #SBATCH --job-name=par_log
 #SBATCH --mail-type=ALL

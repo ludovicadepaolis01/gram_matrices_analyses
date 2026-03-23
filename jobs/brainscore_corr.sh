@@ -7,7 +7,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16GB             # memory requested, per cpu
-#SBATCH --account=Sis25_piasini       # account name
+#SBATCH --account=CMPNS_sissapia       # account name
 #SBATCH --partition=boost_usr_prod # partition name
 #SBATCH --job-name=correlations
 #SBATCH --mail-type=ALL

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=Sis25_piasini
+#SBATCH --account=CMPNS_sissapia
 #SBATCH --partition=boost_usr_prod
 #SBATCH --time=23:55:00
 #SBATCH --nodes=1
