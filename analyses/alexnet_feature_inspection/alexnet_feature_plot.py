@@ -18,39 +18,35 @@ plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plo
 if not os.path.exists(plot_path):
         os.makedirs(plot_path, exist_ok=True)
 
-mean_vecs = []
-std_vecs = []
+layer_means = []
+layer_stds = []
+
 for l in sorted(layer_indices):
     fname = f"{model_name}_features_dtd_layer_{l}.pt"
     features_path = os.path.join(model_features_path, fname)
-    
-    feature = torch.load(features_path, map_location="cpu")
-    print(l, feature.shape)  
 
-    vec = feature.float().mean(dim=(0, 2, 3)).numpy()
-    std = feature.std(dim=(0, 2, 3)).numpy()
-    mean_vecs.append(vec)
-    std_vecs.append(std)
+    feature = torch.load(features_path, map_location="cpu").float()
+    print(l, feature.shape)
 
-rows, cols = 2, 3
-fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 4 * rows))
-axes = axes.flatten()
-    
-for i, (layer, mean_vec, std_vec) in enumerate(zip(layer_indices, mean_vecs, std_vecs)):
-    x = np.arange(len(mean_vec))
+    layer_mean = feature.mean().item()
+    layer_std = feature.std().item()
 
-    axes[i].plot(x, mean_vec)
-    axes[i].fill_between(x, mean_vec - std_vec, mean_vec + std_vec, alpha=0.3)
+    layer_means.append(layer_mean)
+    layer_stds.append(layer_std)
 
-    axes[i].set_title(f"{model_name} dtd layer {layer}")
-    axes[i].set_xlabel("channel index")
-    axes[i].set_ylabel("activation")
+x = np.arange(len(layer_indices))
 
-for j in range(len(layer_indices), len(axes)):
-    axes[j].axis("off")
+plt.figure(figsize=(8, 5))
+plt.errorbar(x, layer_means, yerr=layer_stds, fmt='-o', capsize=5)
 
-out = os.path.join(plot_path, f"{model_name}_dtd_feaures.png")
+plt.xticks(x, layer_indices)
+plt.xlabel("Layer number")
+plt.ylabel("Activation mean and std")
+plt.title(f"{model_name} dtd")
 plt.tight_layout()
-plt.savefig(out)
+
+out = os.path.join(plot_path, f"{model_name}_dtd_stats.png")
+plt.savefig(out, dpi=200, bbox_inches="tight")
 plt.close()
-print("alexnet feature plot done")  
+
+print("saved alexnet plot")
