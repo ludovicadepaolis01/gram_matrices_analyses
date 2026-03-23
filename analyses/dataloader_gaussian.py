@@ -27,7 +27,7 @@ class GaussianImageDataset(Dataset):
 subset_size = subset_size
 
 gaussian_dataset = GaussianImageDataset()
-gaussian_loader = DataLoader(gaussian_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
+gaussian_loader = DataLoader(gaussian_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
 subset_indices = list(range(len(gaussian_dataset)))[:subset_size]
 gaussian_subset = Subset(gaussian_dataset, subset_indices)
 gaussian_subset_loaders = DataLoader(gaussian_subset, batch_size=batch_size, shuffle=True)    

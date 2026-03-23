@@ -58,24 +58,19 @@ model_name = args.model
 pretty_model = pretty_model_names.get(model_name, model_name)
 
 #input path
-path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/gram_matrices"
+path = "/leonardo_scratch/fast/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/gram_matrices"
 file  = os.path.join(path, f"orig_gram_{model_name}_data.h5")
 
 #output paths
-rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms"
+rdms_path = f"/leonardo_scratch/fast/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/rdms"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 csv_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_k47"
 
 for d in [rdms_path, plot_path, csv_path]:
     os.makedirs(d, exist_ok=True)
 
-checkpoint_dir = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/analyses_checkpoints/analyses_ckpts_{model_name}_k47"
+checkpoint_dir = f"/leonardo_work/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/analyses_checkpoints/analyses_ckpts_{model_name}_k47"
 Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
-
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.cluster import AgglomerativeClustering
-from scipy.cluster.hierarchy import dendrogram
 
 def plot_dendrogram(model, *, truncate_mode=None, p=30, ax=None, **dendro_kwargs):
     if ax is None:
@@ -109,6 +104,7 @@ def plot_dendrogram(model, *, truncate_mode=None, p=30, ax=None, **dendro_kwargs
 #it also plots: 
 #1) MI by found cluster
 #2) gram matrices clustering in 3d 
+#3) dendrograms
 def hieararchical_clustering_by_mi(
         gram_vectors_data, 
         true_labels, 

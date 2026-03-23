@@ -68,10 +68,10 @@ mode = mode_name
 subset = ""
 
 #output paths
-reco_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/reco_images_{model_name}"
-orig_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/orig_images_{model_name}"
+reco_path = f"/leonardo_work/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/reco_images_{model_name}"
+orig_path = f"/leonardo_work/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/orig_images_{model_name}"
 info_plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/info_plots/{mode}/info_plot_{model_name}"
-gram_matrices_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/gram_matrices/{mode}_gram_{model_name}_data{subset}.h5"
+gram_matrices_path = f"/leonardo_scratch/fast/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/gram_matrices/{mode}_gram_{model_name}_data{subset}.h5"
 
 
 for d in [reco_path, orig_path, info_plot_path]:
@@ -81,7 +81,7 @@ if not os.path.exists(gram_matrices_path):
     with h5py.File(gram_matrices_path, "w") as _:
         pass
 
-checkpoint_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/models_checkpoints/{mode}/class_ckpts_{model_name}"
+checkpoint_path = f"/leonardo_work/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/models_checkpoints/{mode}/class_ckpts_{model_name}"
 Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
 #take the layer names for data storage thanks chatgpt

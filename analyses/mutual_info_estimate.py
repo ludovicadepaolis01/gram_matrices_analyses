@@ -16,7 +16,9 @@ brainscore_table_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_
 
 #output paths
 out_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_debug"
-plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
+#plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
+plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_temp"
+
 
 for d in [out_path, plot_path]:
     os.makedirs(d, exist_ok=True)

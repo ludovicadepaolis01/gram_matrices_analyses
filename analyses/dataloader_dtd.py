@@ -9,7 +9,7 @@ from PIL import Image
 subset_size = 10
 batch_size = 8
 
-img_path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/clip_textures/data/dtd/images"
+img_path = "/leonardo_scratch/fast/CMPNS_sissapia/ldepaoli/clip_textures/data/dtd/images"
 img_dir = os.listdir(img_path)
 
 #prepare images
