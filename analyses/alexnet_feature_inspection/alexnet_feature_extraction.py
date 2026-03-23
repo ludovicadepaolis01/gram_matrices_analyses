@@ -28,12 +28,12 @@ batch_size = 8
 subset_size = 10
 
 #input paths
-dtd_path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/clip_textures/data/dtd/images"
+dtd_path = "/leonardo_scratch/fast/CMPNS_sissapia/ldepaoli/clip_textures/data/dtd/images"
 dtd_dir = os.listdir(dtd_path)
 dtd_basename = os.path.basename(os.path.dirname(dtd_path))
 print(dtd_basename)
 
-model_features_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/features/{model_name}/dtd"
+model_features_path = f"/leonardo_work/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/features/{model_name}/dtd"
 if not os.path.exists(model_features_path):
     os.makedirs(model_features_path, exist_ok=True)
 

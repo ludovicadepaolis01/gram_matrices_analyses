@@ -10,7 +10,7 @@ layer_indices = [0, 3, 6, 8, 10]
 
 model_name = "alexnet"
 
-model_features_path = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/features/{model_name}/dtd"
+model_features_path = f"/leonardo_work/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/features/{model_name}/dtd"
 if not os.path.exists(model_features_path):
     os.makedirs(model_features_path, exist_ok=True)
 
