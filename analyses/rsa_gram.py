@@ -136,7 +136,7 @@ def hieararchical_clustering_by_mi(
     else:
         done_ks = set()
 
-    all_ks = list(range(2, real_classes+1)) #2-47
+    all_ks = list(range(1, real_classes+1)) #2-47
     ks = [k for k in all_ks if k not in done_ks]
 
     pca = pca_function(n_components=3)
@@ -146,7 +146,7 @@ def hieararchical_clustering_by_mi(
         model = AgglomerativeClustering(n_clusters=k, linkage='ward',compute_distances=True)
         found_clusters = model.fit_predict(gram_vectors_data)
         data_for_mi = np.column_stack([true_labels, found_clusters])
-        mutual_info = mi_function(data_for_mi)    
+        mutual_info = mi_function(data_for_mi) / np.log(2)   
         mi_dict[k] = mutual_info
         label_dict[k] = found_clusters #remove astype or use np.int64
 
