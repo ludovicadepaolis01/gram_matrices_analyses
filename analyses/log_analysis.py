@@ -19,33 +19,10 @@ import math
 mode = "orig"
 
 model_list = [
-    "vgg16",
-    "vgg19",
-    "alexnet",
-    "resnet18",
-    "resnet34",
-    "resnet50",
-    "resnet101",
-    "resnet151",
-    "googlenet",
-    "inceptionv3",
-    "densenet121",
-    "densenet169",
-    "densenet201"
+    "vgg19"
 ]
 
 pretty_model_names = {
-    "alexnet":      "AlexNet",
-    "densenet121":  "DenseNet-121",
-    "densenet169":  "DenseNet-169",
-    "densenet201":  "DenseNet-201",
-    "inceptionv3":  "InceptionV3",
-    "resnet18":     "ResNet18",
-    "resnet34":     "ResNet34",
-    "resnet50":     "ResNet50",
-    "resnet101":    "ResNet101",
-    "resnet152":    "ResNet152",
-    "vgg16":        "VGG-16",
     "vgg19":        "VGG-19",
 }
 
@@ -61,17 +38,17 @@ args = parser.parse_args()
 model_name = args.model
 pretty_model = pretty_model_names.get(model_name, model_name)
 
-path = "/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/gram_matrices"
+path = "/leonardo_scratch/fast/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/gram_matrices"
 output_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses"
 file  = os.path.join(path, f"orig_gram_{model_name}_data.h5")
 
-rdms_path = f"/leonardo_scratch/fast/Sis25_piasini/ldepaoli/gram_matrices_analyses/rdms"
+rdms_path = f"/leonardo_scratch/fast/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/rdms"
 plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
 
 for d in [rdms_path, plot_path]:
     os.makedirs(d, exist_ok=True)
 
-checkpoint_dir = f"/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/log_analysis_checkpoints/log_analysis_ckpts_{model_name}_k47"
+checkpoint_dir = f"/leonardo_work/CMPNS_sissapia/ldepaoli/gram_matrices_analyses/log_analysis_checkpoints/log_analysis_ckpts_{model_name}_k47"
 Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
 
 def log_function(x):
@@ -109,7 +86,7 @@ def hieararchical_clustering_by_mi(
     else:
         done_ks = set()
 
-    all_ks = list(range(2, real_classes+1)) #2-47
+    all_ks = list(range(1, real_classes+1)) #2-47
     ks = [k for k in all_ks if k not in done_ks]
 
     for k in ks:
