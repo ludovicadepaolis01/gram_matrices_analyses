@@ -11,7 +11,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-from alexnet_feature_extraction import alexnet_representations
+from alexnet_arch import alexnet_representations
 print("loaded alexnet")
 
 #params
