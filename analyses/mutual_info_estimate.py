@@ -7,17 +7,19 @@ import regex as re
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from natsort import natsorted
+import datetime
+
+date = datetime.datetime.now()
 
 
 #input paths
-#gram_matrices_path = "/leonardo_work/Sis25_piasini/ldepaoli/gram_matrices_analyses/csvs_k47"
 gram_matrices_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_k47"
 brainscore_table_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs/leaderboard.csv"
 
 #output paths
-out_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_debug"
+out_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/csvs_{date}"
 #plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots"
-plot_path = "/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_temp"
+plot_path = f"/leonardo/home/userexternal/ldepaoli/lab/gram_matrices_analyses/plots_{date}"
 
 
 for d in [out_path, plot_path]:
